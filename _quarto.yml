@@ -8,7 +8,7 @@ execute:
 book:
   title: "Crime in NY"
   author:
-    - Elie Chemouni ()
+    - Elie Chemouni (ec3778)
     - Martin Fluder (mf3590)
   repo-url: https://github.com/fluderm/Crime_NY
   date: today
