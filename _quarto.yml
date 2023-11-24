@@ -6,11 +6,11 @@ execute:
   echo: true
 
 book:
-  title: "YOUR PROJECT TITLE"
+  title: "Crime in NY"
   author:
-    - AUTHOR1 (UNI1)
-    - AUTHOR2 (UNI2)
-  repo-url: https://github.com/YOUR_GITHUB_ACCOUNT/REPO_NAME
+    - Elie Chemouni ()
+    - Martin Fluder (mf3590)
+  repo-url: https://github.com/fluderm/Crime_NY
   date: today
   page-footer:
     right: |
