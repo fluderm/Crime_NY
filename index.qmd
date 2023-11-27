@@ -1,3 +1,3 @@
 # Introduction
 
-test test
+We choose to work on New York state crime data. This topic is valuable for study due to its insights into crime trends over time and across different areas. The first chosen dataset allows us to analyze the evolution of crime over the past 33 years per NY county but also to compare the crime statistics between NYC and NY state. We can explore questions related to crime rates, patterns, and potential influencing factors. For instance, one might investigate the impact of socioeconomic factors, law enforcement strategies, or demographic changes on crime rates. Another interesting question could be the effect of covid on the crime statistics. This dataset allows for a comprehensive analysis of public safety trends, aiding policymakers and the public in understanding and addressing crime issues.
