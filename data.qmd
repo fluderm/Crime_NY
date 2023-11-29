@@ -60,11 +60,15 @@ However, it's crucial to acknowledge potential limitations such as data inconsis
 
 
 
+
+
 ## Missing value analysis and other inconsistencies
 
 We shall now investigate our two datasets for missing values, inconsistencies and discuss if our findings will impact our research and results.
 
 ### NY State crime dataset
+
+We start by investigating the NY State crime dataset.
 
 ```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
 library(sf)
@@ -132,17 +136,60 @@ crime_ny_with_fips_and_pop <- crime_ny_with_fips_and_pop[, !(names(crime_ny_with
 
 # check NA columns for crime_ny:
 na_cols <- colSums(is.na(crime_ny_with_fips_and_pop))
-# cat("Columns with NA values:", names(na_cols[na_cols>0]), "\n")
+cat("Columns with NA values:", names(na_cols[na_cols>0]), "\n")
 # find NA values only in Months Reported column.
-
-na_rows <- crime_ny_with_fips_and_pop[is.na(crime_ny_with_fips_and_pop[, names(na_cols[na_cols>0])]), ]
-# NA values in Months Reported are 1-1 with County Total data.
-# cat("Rows with NA values:", nrow(subset(na_rows, !(Agency == "County Total"))), "\n")
 ```
 
+We find that the data is really well-sourced and only contains NA values for the "Months Reported" column. In particular, upon further investigation, it turns out that a lot of the NA values appear in the accumulated County Total rows, because as soon as an Agency does not indicate the number of months they reported this will lead to an NA value in the accumulation.
+
+Otherwise, below we have summarized the percentage of NA values in the Months Collected column per county.
+
+```{r}
+na_cols <- colSums(is.na(crime_ny))
+na_rows <- crime_ny[is.na(crime_ny[, names(na_cols[na_cols>0])]), ]
+
+na_rows_cnt <- na_rows %>% group_by(County) %>% summarise(Count = n())
+crime_ny_cnt <- crime_ny %>% group_by(County) %>% summarise(Count = n())
+na_rows_cnt$pct <- na_rows_cnt$Count/crime_ny_cnt$Count
+
+na_rows_cnt <- na_rows_cnt[order(na_rows_cnt$pct, decreasing = TRUE), ]
+
+ggplot(na_rows_cnt, aes(x = reorder(County, -pct), y = pct)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Percentage of Missing \"Months Collected\" Values by County",
+       x = "County", y = "Percentage") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+```
+
+We notice that the five counties with the most missing value percentages in the Months Collected column are the ones, where we do not have Agency-level data, only County total data. We believe these numbers were aggregated from different datasets, which may have varying degree of accuracy with respect to their Months collected information.
+
+While we are not specifically interested in the Months collected column, we need to keep in mind that if for strictly less than 12 months per year data was collected, there might be a skew in the data. We therefore have a quick look at the strictly less than 12 months reported within the non-NA reported values.
 
 
+```{r}
 
+less_12 <- crime_ny[(crime_ny$Months.Reported < 12) & !is.na(crime_ny$Months.Reported), ]
+less_12_cnt <- less_12 %>% group_by(County) %>% summarise(Count = n())
+
+no_na_crime_ny_cnt <- crime_ny[!is.na(crime_ny$Months.Reported), ] %>% group_by(County) %>% summarise(Count = n())
+merged_data <- merge(less_12_cnt, no_na_crime_ny_cnt, by = "County", all.x = TRUE)
+merged_data$pct <- merged_data$Count.x/merged_data$Count.y
+
+merged_data <- merged_data[order(merged_data$pct, decreasing = TRUE), ]
+
+ggplot(merged_data, aes(x = reorder(County, -pct), y = pct)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Percentage of <12 vs =12\"Months Collected\" by County",
+       x = "County", 
+       y = "Percentage of <12 vs =12 Months Collected") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+```
+
+We see that the data with less than 12 months collected compared against the data with exactly 12 months collected is negligible. Based on this, we believe that the missing NA values are mostly due to data collection negligency rather than actually varying number of months collected.
+
+Apart from the missing values, we wanted to check that the data aggregation was consistent. We first checked that the columns sum to their respective total columns for each row, and find that there is no inconsistency there:
 
 ```{r, warning = FALSE}
 # Check that other entries sum to Index.Total:
@@ -173,11 +220,10 @@ cat(nrow(check_result[check_result$Check!='Pass',]), ' rows with mismatch of Bur
 
 ```
 
+Finally, we would also like to check whether there is a mismatch between the County Total accumulation and the individual (by-agency) values. It turns out that for the cases in which we have by-agency data, there is a very minor mismatch between the summed data and the County total data in Nassau in 1990 and in Albany between 1990 and 1997. We conjecture that it might be due to data from a missing agency, but could not verify this.
 
 ```{r}
-
 # Find mismatch in County Total vs per-police station:
-
 county_total_entries <- crime_ny %>%
   filter(Agency == "County Total")
 
@@ -234,29 +280,7 @@ mismatch_rows_long_indextot_long <- tidyr::pivot_longer(mismatch_rows_long_index
                                                        names_to = "Category", 
                                                        values_to = "Value")
 
-plot <- ggplot(mismatch_rows_long_indextot_long, aes(x = Category, y = Value, fill = Category)) +
-  geom_bar(stat = "identity") +
-  theme_minimal() +
-  labs(title = "Mismatch Plot for summed up of reported values vs County Total values",
-       fill = "Category") +
-  facet_wrap(~County + Year, scales = "free_y") +
-  theme(legend.position = "none") +
-  ylim(0, max(mismatch_rows_long_indextot$Index.Total.x, mismatch_rows_long_indextot$Index.Total.y) + 500)
-
-print(plot)
-
-mismatch_rows_long_indextot <- subset(mismatch_rows_long_indextot, County=='Albany')
-
-# ggplot(mismatch_rows_long_indextot, aes(x = interaction(Year, County))) +
-#   geom_bar(aes(y = Index.Total.y, fill = "County Total values"), stat = "identity") +
-#   geom_bar(aes(y = Index.Total.x, fill = "Sum of Reported Values by Agencies"), stat = "identity") +
-#   labs(title = "Difference between County total values and summed up provided values for Albany county", 
-#        x = "Year", 
-#        y = "Total Number of Crimes") +
-#   scale_fill_manual(values = c("County Total values" = "red", 
-#                                "Sum of Reported Values by Agencies" = "blue")) +
-#   theme_minimal()+
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+#mismatch_rows_long_indextot <- subset(mismatch_rows_long_indextot, County=='Albany')
 
 ggplot(mismatch_rows_long_indextot, 
        aes(x = interaction(Year, County))) +
@@ -276,10 +300,9 @@ ggplot(mismatch_rows_long_indextot,
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 
-#subset_data <- mismatch_rows_long[mismatch_rows_long$Variable == 'Check_Index.Total', ]
-#subset_data$diff <- subset_data$Index.Total.x - subset_data$Index.Total.y
-
 ```
+
+In the plot above we compare for each inconsistency the discrepancy in the total crime number. We can observe that the inconsistency is very minor and will not affect our analysis below.
 
 
 ### NY State population dataset
