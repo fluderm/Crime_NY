@@ -701,7 +701,23 @@ library(ggplot2)
 library(sp)
 library(sf)
 
-#shapefile=readOGR("shapefiles","nyu_2451_34490.shp")
+crime_nyc <- read.csv('../data/NYPD_Shooting_Incident_Data__Historic__20231124.csv')
+crime_nyc$OCCUR_DATE <- as.Date(crime_nyc$OCCUR_DATE, format = '%m/%d/%Y')
+
+na_cols <- colSums(is.na(crime_nyc))
+cat("Columns with NA values:", names(na_cols[na_cols>0]), "\n")
+
+crime_nyc <- subset(crime_nyc, select = -JURISDICTION_CODE)
+na_cols <- colSums(is.na(crime_nyc))
+na_rows <- crime_nyc[is.na(crime_nyc[, names(na_cols[na_cols>0])]), ]
+
+print(head(na_rows,30))
+
+# mostly empty rows -- two incidences have missing jurisdiction_code, but we don't really care about that.
+
+#cat("Rows with NA values:", nrow(subset(na_rows, !(Agency == "County Total"))), "\n")
+#cat("Newest with NA values:",max((subset(na_rows, !(Agency == "County Total")))$Year), "\n")
+
 
 dsn <- "nyu_2451_34490.shp"
 nyc_boundaries <- st_read('../../nyc_election_districts/nyc_election_districts.shp')

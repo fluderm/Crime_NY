@@ -307,6 +307,9 @@ In the plot above we compare for each inconsistency the discrepancy in the total
 
 ### NY State population dataset
 
+We now focus on the [population dataset](https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k).
+
+We first plot the percentage of the available (i.e. non-NA) data:
 
 ```{r}
 pop_ny <- read.csv('data/Annual_Population_Estimates_for_New_York_State_and_Counties__Beginning_1970.csv')
@@ -317,66 +320,81 @@ missing_percentage <- sapply(pop_ny,
 result <- data.frame(Column = names(missing_percentage), 
                      MissingPercentage = missing_percentage)
 result <- result[order(-result$MissingPercentage), ]
-print(result)
+
+ggplot(result, 
+       aes(x = Column, 
+           y = 100 - MissingPercentage)) +
+  geom_bar(stat = "identity", 
+           fill = "lightblue") +
+  geom_text(aes(label = sprintf("%.1f%%", 100 - MissingPercentage)),
+            vjust = 1.5, size = 5) +  # Add percentage labels
+  labs(title = "Percentage of Available Data in Each Column",
+       x = "Column",
+       y = "Available Percentage") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
-na_cols <- colSums(is.na(pop_ny))
-cat("Columns with NA values:", names(na_cols[na_cols>0]), "\n")
+It turns out that we do not have any missing values.
 
-```
+Nonetheless, as mentioned above, the population datasets contain estimates of the population for the years within/outside of census data. We want to visualize how well these estimations perform, and whether there are large discrepancies with the "actual" (we take the census numbers as the ground truth) population numbers.
+
+To do so we focus on the numbers for the whole state as a representative. Furthermore, we restrict to data after 1990, as that is the time period for which we have NY State crime data:
 
 ```{r}
 
-pop_ny_full_state <- pop_ny[pop_ny$Geography == 'New York State', ]
+pop_ny_full_state <- pop_ny[(pop_ny$Geography == 'New York State') & (pop_ny$Year >= 1990), ]
 
-population_plot <- ggplot(pop_ny_full_state, 
-                          aes(x = Year, 
-                              y = Population, 
-                              fill = Program.Type)) +
-  geom_col(position = "dodge") +
-  labs(title = "Population per Year", 
+ggplot(pop_ny_full_state, 
+                        aes(x = Year, 
+                            y = Population, 
+                            fill = Program.Type)) +
+  geom_col(position = "dodge", 
+           width = 0.9) + 
+  labs(title = "Population (estimate) per Year", 
        x = "Year", 
        y = "Population") +
   scale_fill_manual(values = c("Census Base Population" = "blue", 
                               "Postcensal Population Estimate" = "red",
                               'Intercensal Population Estimate' = 'orange')) +
-  theme_minimal()
-
-plot(population_plot)
+  theme_minimal() +
+  theme(legend.position = "bottom")
 
 ```
 
+Notice that we have estimates even for the census years (1990, 2000, 2010 and 2020); Their respective bars are split into two (and of different color). The intercensal population estimates are seem like they are quite in line with the census data (which makes sense), while there is a small jump between the 2019 estimate and the 2020 census data. As we remarked above, this dataset was first created in 2014 and kept as point-in-time. Therefore, the estimates will be postcensal for anything after 2010.
+
+We conclude that the estimates will certainly be good enough for our purposes. The crime/population will divide a small-ish number by a large number and therefore small errors in the population estimate will not affect any conclusions we shall draw in the following.
+
 
 ```{r}
-library(tidyr)
-
-
-census_years <- unique(pop_ny_full_state[pop_ny_full_state$Program.Type == 'Census Base Population', ]$Year)
-
-pop_ny_full_state_cens_yrs <- subset(pop_ny_full_state, pop_ny_full_state$Year %in% census_years)
-
-pop_ny_full_state_cens_yrs_wide <- pivot_wider(pop_ny_full_state_cens_yrs, 
-                       names_from = Program.Type, 
-                       values_from = Population)
-colnames(pop_ny_full_state_cens_yrs_wide)
-
-names(pop_ny_full_state_cens_yrs_wide)
-
-ggplot(pop_ny_full_state_cens_yrs_wide, aes(x = Year)) +
-  geom_point(aes(y = `Census Base Population`, color = "Census Base Population"), 
-             position = position_dodge(width = 0.4)) +
-  geom_point(aes(y = `Intercensal Population Estimate`, color = "Intercensal Estimate"), 
-             position = position_dodge(width = 0.2)) +
-  geom_point(aes(y = `Postcensal Population Estimate`, color = "Postcensal Estimate"), 
-             position = position_dodge(width = -0.2)) +
-  labs(title = "A", x = "B", y = "C") +
-  scale_color_manual(values = c("Census Base Population" = "blue", 
-                                "Intercensal Estimate" = "orange",
-                                "Postcensal Estimate" = "red"),
-                     name = "Legend Title") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
+#
+# 
+# census_years <- unique(pop_ny_full_state[pop_ny_full_state$Program.Type == 'Census Base Population', ]$Year)
+# 
+# pop_ny_full_state_cens_yrs <- subset(pop_ny_full_state, pop_ny_full_state$Year %in% census_years)
+# 
+# pop_ny_full_state_cens_yrs_wide <- pivot_wider(pop_ny_full_state_cens_yrs, 
+#                        names_from = Program.Type, 
+#                        values_from = Population)
+# colnames(pop_ny_full_state_cens_yrs_wide)
+# 
+# names(pop_ny_full_state_cens_yrs_wide)
+# 
+# ggplot(pop_ny_full_state_cens_yrs_wide, aes(x = Year)) +
+#   geom_point(aes(y = `Census Base Population`, color = "Census Base Population"), 
+#              position = position_dodge(width = 0.4)) +
+#   geom_point(aes(y = `Intercensal Population Estimate`, color = "Intercensal Estimate"), 
+#              position = position_dodge(width = 0.2)) +
+#   geom_point(aes(y = `Postcensal Population Estimate`, color = "Postcensal Estimate"), 
+#              position = position_dodge(width = -0.2)) +
+#   labs(title = "A", x = "B", y = "C") +
+#   scale_color_manual(values = c("Census Base Population" = "blue", 
+#                                 "Intercensal Estimate" = "orange",
+#                                 "Postcensal Estimate" = "red"),
+#                      name = "Legend Title") +
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 
