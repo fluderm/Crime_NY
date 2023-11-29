@@ -12,16 +12,12 @@ Explain why you chose this topic, and the questions you are interested in studyi
 
 While deciding on a topic for our project, we received several emails from the Columbia Department of Safety about an armed robbery near the Columbia campus. This prompted us to get interested in Crime data in and around NYC – in particular; it made us question the safety around Columbia and NYC. We found several exciting and detailed datasets about crime in NYC and quickly focused on [NYC incident-level shooting](https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8) data in the past ten years to see how much “danger” we are:
 
-
-
-
 ```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
 
 library(ggplot2)
 library(sp)
 library(sf)
 library(RColorBrewer)
-
 
 crime_nyc <- read.csv('../data/NYPD_Shooting_Incident_Data__Historic__20231124.csv')
 crime_nyc$OCCUR_DATE <- as.Date(crime_nyc$OCCUR_DATE, format = '%m/%d/%Y')
