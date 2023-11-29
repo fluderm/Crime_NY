@@ -290,21 +290,34 @@ crime_ny[(crime_ny$Agency=="Albany County (RR-D and H)"),]
 
 ```
 
-```{r}
-
-```
 
 ```{r}
-
 # Check that other entries sum to Index.Total:
 
-check_result <- county_total_entries %>%
-  group_by(Year, County) %>%
-  summarise(Sum_Other_Entries = sum(Index.Total)) %>%
-  left_join(county_total_entries, by = c("Year", "County")) %>%
+# First check Property Total + Violent Total == Index Total
+check_result <- crime_ny %>%
+  group_by(Year, County, Agency) %>%
+  summarise(Sum_Other_Entries = Property.Total + Violent.Total) %>%
+  left_join(crime_ny, by = c("Year", "County", "Agency")) %>%
   mutate(Check = ifelse(Sum_Other_Entries == Index.Total, "Pass", "Fail"))
+cat('Number of rows with mismatch of Property Total + Violent Total == Index Total = ',nrow(check_result[check_result$Check!='Pass',]),'\n')
 
+# First check Murder + Rape + Robbery + Aggravated Assault == Violent Total
+check_result <- crime_ny %>%
+  group_by(Year, County, Agency) %>%
+  summarise(Sum_Other_Entries = Murder + Rape + Robbery + Aggravated.Assault) %>%
+  left_join(crime_ny, by = c("Year", "County", "Agency")) %>%
+  mutate(Check = ifelse(Sum_Other_Entries == Violent.Total, "Pass", "Fail"))
 print(nrow(check_result[check_result$Check!='Pass',]))
+cat('Number of rows with mismatch of Murder + Rape + Robbery + Aggravated Assault == Violent Total = ',nrow(check_result[check_result$Check!='Pass',]),'\n')
+
+# First check Burglary + Larceny + Motor.Vehicle.Theft == Property Total
+check_result <- crime_ny %>%
+  group_by(Year, County, Agency) %>%
+  summarise(Sum_Other_Entries = Burglary + Larceny + Motor.Vehicle.Theft) %>%
+  left_join(crime_ny, by = c("Year", "County", "Agency")) %>%
+  mutate(Check = ifelse(Sum_Other_Entries == Property.Total, "Pass", "Fail"))
+cat('Number of rows with mismatch of Burglary + Larceny + Motor.Vehicle.Theft == Property Total Total = ',nrow(check_result[check_result$Check!='Pass',]),'\n')
 
 ```
 

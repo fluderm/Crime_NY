@@ -28,14 +28,26 @@ Describe any patterns you discover in missing values. If no values are missing, 
 
 # Data
 
-The dataset on [Index Crimes by County and Agency in New York](https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq), is collected by the New York State Division of Criminal Justice Services, which obtains crime reports from more than 500 New York State police and sheriffs' departments. The data is formatted in a tabular structure, with columns specifying details like county, agency, year, region, and various crime categories. So, the dataset includes geographic information (county and agency), temporal information (year), and crime categories. 
+## Technical Description
+
+The dataset on [Index Crimes by County and Agency in New York](https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq), is collected by the New York State Division of Criminal Justice Services, which obtains crime reports from more than 500 New York State police and sheriffs' departments. The data is formatted in a tabular structure, with columns specifying details like county, agency, year, region, and various crime categories. So, the dataset includes geographic information (county and agency), temporal information (year), and crime categories, and contains roughly 22 thousand rows and 15 columns.
+
 The reporting system gathers data on seven Index offenses, which are commonly utilized to assess the overall volume of crime. These encompass violent crimes such as murder/non-negligent manslaughter, forcible rape, robbery, and aggravated assault, as well as property crimes like burglary, larceny, and motor vehicle theft.
-The dimensions of the data are of 22K rows and 15 columns.
+
 The data has been collected since January 1990. The frequency of updates is on an annual basis, but the individual law enforcement agencies monthly report their total crimes to the New York State Division of Criminal Justice Services.
 Possible issues with the data could include inconsistencies in reporting methods among different agencies, variations in the definition of crimes, or potential underreporting. We should be cautious about these nuances when interpreting trends or making comparisons across regions and time periods. Indeed, police agencies might encounter challenges in reporting, which could hinder accurate or comprehensive data submission. The figures reflect solely the crimes reported to the police and do not encompass the total number of crimes that took place.
 
+We carefully check that the data is consistent, i.e. that the various accumulations performed within the dataset are correct. We find some inconsistencies in the County Total accumulation in Albany from 1990-1997 and Nassau County in 1990. We discuss this further in the missing values analysis.
 
-## Description
+Since comparing crime numbers among the different counties only really makes sense if we normalize by population, we supplement our main dataset, [Index Crimes by County and Agency in New York](https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq), with an official population dataset of the counties in NY state. The [population dataset](https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k), is a dataset curated by the New York State Department of Labor and started in 2014. It has been updated yearly since then, and contains the (estimated) population of each County in NY state by year since 1970. 
+
+The dataset contains the [FIPS](https://en.wikipedia.org/wiki/Federal_Information_Processing_Standards) ("Federal Information Processing Standards") code of each NY state county together with the name of the county ("Geography"), the year and its population estimate. Finally, it includes a column, "Program Type", detailing the way the population number was estimated. The estimations are interpolations or extrapolations of the 10 year census data of NY State. Before 2010, the estimations are based on interpolations, since for each year in between the actual census data, both previous and next census numbers were known. However, after 2010, the data was kept as point-in-time, and therefore the estimations were based solely on extrapolating the previous census numbers. Notice that it is important to keep the data point-in-time as changing the numbers in hindsight would lead to issues with models that use the extrapolated data numbers.
+
+The more detailed methodology of the "intercensal estimation" are detailed [here](https://www.epa.gov/sites/default/files/2015-05/documents/aceappendixb_censusintercensalandpostcensaldata.pdf) and [here](https://www2.census.gov/programs-surveys/popest/technical-documentation/methodology/intercensal/2000-2010-intercensal-estimates-methodology.pdf). Essentially, for intercensal estimates, they combine the data from the two censuses with death, birth, migration and immigration data to provide an estimate, while for postcensal estimates, they use the previous census data together with the same external sources to provide an estimate.
+
+We shall investigate the efficacies of these estimates briefly below and notice that the extrapolation is comparatively worse than the intercensal estmated data.
+
+## Research plan
 
 To answer research questions related to crime trends and influencing factors, the first dataset offers a rich source of information. Regarding the temporal analysis, we can examine crime rates over multiple years and then can identify trends and patterns. This enables the assessment of whether crime has increased, decreased, or remained stable over time, providing insights into the effectiveness of law enforcement strategies, changes in societal conditions or from the perspective of pre/during/post covid.
 Moreover, a geographic analysis is also possible. Indeed, the dataset includes information on crimes reported by different counties and agencies. This allows us to compare crime rates across regions, potentially revealing spatial patterns. For example, we can compare the evolution of crime between NYC and NY state. Understanding variations in crime rates helps tailor interventions to specific areas. 
@@ -46,17 +58,303 @@ Since the dataset spans several years, we can conduct longitudinal studies, obse
 By comparing data across different agencies or counties, researchers can identify variations in reporting practices, law enforcement effectiveness, or community characteristics that may influence crime rates. 
 However, it's crucial to acknowledge potential limitations such as data inconsistencies, reporting biases, and missing information, which may affect the robustness of conclusions drawn from the analysis.
 
-## Research plan
+
+
+## Missing value analysis and other inconsistencies
+
+We shall now investigate our two datasets for missing values, inconsistencies and discuss if our findings will impact our research and results.
+
+### NY State crime dataset
+
+```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
+library(sf)
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(gifski)
+library(transformr)
+library(dplyr)
+library(ggplot2)
+library(forcats)
+library(gganimate)
+
+# load and clean/fix data for later use:
+
+crime_ny <- read.csv("data/Index_Crimes_by_County_and_Agency__Beginning_1990.csv")
+
+# not planing on using this:
+# crime_nyc <- read.csv('data/NYPD_Shooting_Incident_Data__Historic__20231124.csv')
+
+pop_ny <- read.csv('data/Annual_Population_Estimates_for_New_York_State_and_Counties__Beginning_1970.csv')
+
+# standardize FIPS to work with below conventions:
+pop_ny$FIPS.Code <- substr(pop_ny$FIPS.Code, 3, nchar(pop_ny$FIPS.Code))
+
+# map fips to County name:
+county_fips <- data.frame(
+  FIPS = c(
+    "001", "003", "005", "007", "009", "011", "013", "015", "017", "019", "021",
+    "023", "025", "027", "029", "031", "033", "035", "037", "039", "041",
+    "043", "045", "047", "049", "051", "053", "055", "057", "059", "061",
+    "063", "065", "067", "069", "071", "073", "075", "077", "079", "081",
+    "083", "085", "087", "089", "089", "091", "093", "095", "097", "099", "101",
+    "103", "105", "107", "109", "111", "113", "115", "117", "119", "121", "123"
+  ),
+  Name = c(
+    "Albany", "Allegany", "Bronx", "Broome", "Cattaraugus", "Cayuga", "Chautauqua",
+    "Chemung", "Chenango", "Clinton", "Columbia", "Cortland", "Delaware",
+    "Dutchess", "Erie", "Essex", "Franklin", "Fulton", "Genesee", "Greene",
+    "Hamilton", "Herkimer", "Jefferson", "Kings", "Lewis", "Livingston",
+    "Madison", "Monroe", "Montgomery", "Nassau", "New York", "Niagara",
+    "Oneida", "Onondaga", "Ontario", "Orange", "Orleans", "Oswego",
+    "Otsego", "Putnam", "Queens", "Rensselaer", "Richmond", "Rockland",
+    "St. Lawrence", "St Lawrence", "Saratoga", "Schenectady", "Schoharie", "Schuyler",
+    "Seneca", "Steuben", "Suffolk", "Sullivan", "Tioga", "Tompkins",
+    "Ulster", "Warren", "Washington", "Wayne", "Westchester", "Wyoming", "Yates"
+  )
+)
+
+# add fips to crime_ny --> will allow us to identify with fips in .shp file and merge with pop_ny file.
+crime_ny$County <- as.character(crime_ny$County)
+crime_ny_with_fips <- merge(crime_ny, county_fips, by.x = "County", by.y = "Name", all.x = TRUE)
+crime_ny_with_fips <- crime_ny_with_fips[crime_ny_with_fips$Agency == 'County Total', ]
+
+# merge population and NY-state crime datasets:
+crime_ny_with_fips_and_pop <- merge(crime_ny_with_fips, 
+                                    pop_ny, by.x = c("FIPS", "Year"), 
+                                    by.y = c("FIPS.Code", "Year"), 
+                                    all.x = TRUE)
+crime_ny_with_fips_and_pop <- crime_ny_with_fips_and_pop[!is.na(crime_ny_with_fips_and_pop$Index.Total), ]
+
+# drop geography and program type from merged dataframe (geograph is simply the name of the county)
+# and program type is the way it was estimated.
+crime_ny_with_fips_and_pop <- crime_ny_with_fips_and_pop[, !(names(crime_ny_with_fips_and_pop) %in% c("Geography", "Program.Type"))]
+
+# check NA columns for crime_ny:
+na_cols <- colSums(is.na(crime_ny_with_fips_and_pop))
+# cat("Columns with NA values:", names(na_cols[na_cols>0]), "\n")
+# find NA values only in Months Reported column.
+
+na_rows <- crime_ny_with_fips_and_pop[is.na(crime_ny_with_fips_and_pop[, names(na_cols[na_cols>0])]), ]
+# NA values in Months Reported are 1-1 with County Total data.
+# cat("Rows with NA values:", nrow(subset(na_rows, !(Agency == "County Total"))), "\n")
+```
 
 
 
 
 
+```{r, warning = FALSE}
+# Check that other entries sum to Index.Total:
+
+# First check Property Total + Violent Total == Index Total
+check_result <- crime_ny %>%
+  group_by(Year, County, Agency) %>%
+  summarise(Sum_Other_Entries = Property.Total + Violent.Total, .groups = "drop") %>%
+  left_join(crime_ny, by = c("Year", "County", "Agency")) %>%
+  mutate(Check = ifelse(Sum_Other_Entries == Index.Total, "Pass", "Fail"))
+cat(nrow(check_result[check_result$Check!='Pass',]), ' rows with mismatch of Property Total + Violent Total == Index Total.\n')
+
+# First check Murder + Rape + Robbery + Aggravated Assault == Violent Total
+check_result <- crime_ny %>%
+  group_by(Year, County, Agency) %>%
+  summarise(Sum_Other_Entries = Murder + Rape + Robbery + Aggravated.Assault, .groups = "drop") %>%
+  left_join(crime_ny, by = c("Year", "County", "Agency")) %>%
+  mutate(Check = ifelse(Sum_Other_Entries == Violent.Total, "Pass", "Fail"))
+cat(nrow(check_result[check_result$Check!='Pass',]), ' rows with mismatch of Murder + Rape + Robbery + Aggravated Assault == Violent Total. \n')
+
+# First check Burglary + Larceny + Motor.Vehicle.Theft == Property Total
+check_result <- crime_ny %>%
+  group_by(Year, County, Agency) %>%
+  summarise(Sum_Other_Entries = Burglary + Larceny + Motor.Vehicle.Theft, .groups = "drop") %>%
+  left_join(crime_ny, by = c("Year", "County", "Agency")) %>%
+  mutate(Check = ifelse(Sum_Other_Entries == Property.Total, "Pass", "Fail"))
+cat(nrow(check_result[check_result$Check!='Pass',]), ' rows with mismatch of Burglary + Larceny + Motor.Vehicle.Theft == Property Total Total. \n')
+
+```
 
 
+```{r}
 
-## Missing value analysis
+# Find mismatch in County Total vs per-police station:
 
+county_total_entries <- crime_ny %>%
+  filter(Agency == "County Total")
+
+columns_to_sum <- c(
+  "Index.Total", "Violent.Total", "Murder", "Rape",
+  "Robbery", "Aggravated.Assault", "Property.Total",
+  "Burglary", "Larceny", "Motor.Vehicle.Theft"
+)
+
+crime_ny_not_ct <- crime_ny[crime_ny$Agency!='County Total',] 
+
+summed_data <- crime_ny_not_ct %>%
+  group_by(Year, County) %>%
+  summarise(across(all_of(columns_to_sum), sum), .groups = "drop")
+
+comparison_result <- left_join(summed_data, 
+                               county_total_entries, 
+                               by = c("Year", "County"))
+
+comparison_result <- comparison_result %>%
+  mutate(
+    Check_Index.Total = ifelse(Index.Total.x == Index.Total.y, "Match", "Mismatch"),
+    Check_Violent.Total = ifelse(Violent.Total.x == Violent.Total.y, "Match", "Mismatch"),
+    Check_Murder = ifelse(Murder.x == Murder.y, "Match", "Mismatch"),
+    Check_Rape = ifelse(Rape.x == Rape.y, "Match", "Mismatch"),
+    Check_Robbery = ifelse(Robbery.x == Robbery.y, "Match", "Mismatch"),
+    Check_Aggravated.Assault = ifelse(Aggravated.Assault.x == Aggravated.Assault.y, "Match", "Mismatch"),
+    Check_Property.Total = ifelse(Property.Total.x == Property.Total.y, "Match", "Mismatch"),
+    Check_Burglary = ifelse(Burglary.x == Burglary.y, "Match", "Mismatch"),
+    Check_Larceny = ifelse(Larceny.x == Larceny.y, "Match", "Mismatch"),
+    Check_Motor.Vehicle.Theft = ifelse(Motor.Vehicle.Theft.x == Motor.Vehicle.Theft.y, "Match", "Mismatch")
+  )
+
+check_columns <- paste0("Check_", columns_to_sum)
+mismatch_rows <- comparison_result %>%
+  rowwise() %>%
+  filter(any(c_across(all_of(check_columns)) == "Mismatch"))
+
+mismatch_rows_long <- tidyr::gather(mismatch_rows, key = "Variable", value = "Check_Value", all_of(check_columns))
+mismatch_rows_long <- mismatch_rows_long[mismatch_rows_long$Check_Value =='Mismatch',] 
+
+variables <- unique(mismatch_rows_long$Variable)
+for (variable in variables) {
+  variable_name <- gsub("^Check_", "", variable)
+  xx <- mismatch_rows_long[mismatch_rows_long$Variable == variable, ]
+  mismatch_rows_long[mismatch_rows_long$Variable == variable,'diff'] <-
+    xx[, paste0(variable_name, ".y")] - xx[, paste0(variable_name, ".x")]
+}
+
+mismatch_rows_long_indextot <- mismatch_rows_long[mismatch_rows_long$Variable == 'Check_Index.Total',]
+
+mismatch_rows_long_indextot_long <- tidyr::pivot_longer(mismatch_rows_long_indextot, 
+                                                       cols = c("Index.Total.x", "Index.Total.y"), 
+                                                       names_to = "Category", 
+                                                       values_to = "Value")
+
+plot <- ggplot(mismatch_rows_long_indextot_long, aes(x = Category, y = Value, fill = Category)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Mismatch Plot for summed up of reported values vs County Total values",
+       fill = "Category") +
+  facet_wrap(~County + Year, scales = "free_y") +
+  theme(legend.position = "none") +
+  ylim(0, max(mismatch_rows_long_indextot$Index.Total.x, mismatch_rows_long_indextot$Index.Total.y) + 500)
+
+print(plot)
+
+mismatch_rows_long_indextot <- subset(mismatch_rows_long_indextot, County=='Albany')
+
+# ggplot(mismatch_rows_long_indextot, aes(x = interaction(Year, County))) +
+#   geom_bar(aes(y = Index.Total.y, fill = "County Total values"), stat = "identity") +
+#   geom_bar(aes(y = Index.Total.x, fill = "Sum of Reported Values by Agencies"), stat = "identity") +
+#   labs(title = "Difference between County total values and summed up provided values for Albany county", 
+#        x = "Year", 
+#        y = "Total Number of Crimes") +
+#   scale_fill_manual(values = c("County Total values" = "red", 
+#                                "Sum of Reported Values by Agencies" = "blue")) +
+#   theme_minimal()+
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+ggplot(mismatch_rows_long_indextot, 
+       aes(x = interaction(Year, County))) +
+  geom_bar(aes(y = Index.Total.y, 
+               fill = "County Total values"), 
+           stat = "identity", 
+           position = "dodge") +
+  geom_bar(aes(y = Index.Total.x, 
+               fill = "Sum of Reported Values by Agencies"), 
+           stat = "identity", 
+           position = "dodge") +
+  labs(title = "Difference between County total values and summed up provided values for Albany county", 
+       x = "Year + County", 
+       y = " Number of Crimes") +
+  scale_fill_manual(values = c("County Total values" = "red", 
+                               "Sum of Reported Values by Agencies" = "blue")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+#subset_data <- mismatch_rows_long[mismatch_rows_long$Variable == 'Check_Index.Total', ]
+#subset_data$diff <- subset_data$Index.Total.x - subset_data$Index.Total.y
+
+```
+
+
+### NY State population dataset
+
+
+```{r}
+pop_ny <- read.csv('data/Annual_Population_Estimates_for_New_York_State_and_Counties__Beginning_1970.csv')
+pop_ny$FIPS.Code <- substr(pop_ny$FIPS.Code, 3, nchar(pop_ny$FIPS.Code))
+
+missing_percentage <- sapply(pop_ny, 
+                             function(x) sum(is.na(x) | x == "") / length(x) * 100)
+result <- data.frame(Column = names(missing_percentage), 
+                     MissingPercentage = missing_percentage)
+result <- result[order(-result$MissingPercentage), ]
+print(result)
+```
+
+na_cols <- colSums(is.na(pop_ny))
+cat("Columns with NA values:", names(na_cols[na_cols>0]), "\n")
+
+```
+
+```{r}
+
+pop_ny_full_state <- pop_ny[pop_ny$Geography == 'New York State', ]
+
+population_plot <- ggplot(pop_ny_full_state, 
+                          aes(x = Year, 
+                              y = Population, 
+                              fill = Program.Type)) +
+  geom_col(position = "dodge") +
+  labs(title = "Population per Year", 
+       x = "Year", 
+       y = "Population") +
+  scale_fill_manual(values = c("Census Base Population" = "blue", 
+                              "Postcensal Population Estimate" = "red",
+                              'Intercensal Population Estimate' = 'orange')) +
+  theme_minimal()
+
+plot(population_plot)
+
+```
+
+
+```{r}
+library(tidyr)
+
+
+census_years <- unique(pop_ny_full_state[pop_ny_full_state$Program.Type == 'Census Base Population', ]$Year)
+
+pop_ny_full_state_cens_yrs <- subset(pop_ny_full_state, pop_ny_full_state$Year %in% census_years)
+
+pop_ny_full_state_cens_yrs_wide <- pivot_wider(pop_ny_full_state_cens_yrs, 
+                       names_from = Program.Type, 
+                       values_from = Population)
+colnames(pop_ny_full_state_cens_yrs_wide)
+
+names(pop_ny_full_state_cens_yrs_wide)
+
+ggplot(pop_ny_full_state_cens_yrs_wide, aes(x = Year)) +
+  geom_point(aes(y = `Census Base Population`, color = "Census Base Population"), 
+             position = position_dodge(width = 0.4)) +
+  geom_point(aes(y = `Intercensal Population Estimate`, color = "Intercensal Estimate"), 
+             position = position_dodge(width = 0.2)) +
+  geom_point(aes(y = `Postcensal Population Estimate`, color = "Postcensal Estimate"), 
+             position = position_dodge(width = -0.2)) +
+  labs(title = "A", x = "B", y = "C") +
+  scale_color_manual(values = c("Census Base Population" = "blue", 
+                                "Intercensal Estimate" = "orange",
+                                "Postcensal Estimate" = "red"),
+                     name = "Legend Title") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
 
 
 
