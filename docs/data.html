@@ -177,7 +177,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#technical-description" id="toc-technical-description" class="nav-link active" data-scroll-target="#technical-description"><span class="header-section-number">2.1</span> Technical Description</a></li>
-  <li><a href="#research-plan" id="toc-research-plan" class="nav-link" data-scroll-target="#research-plan"><span class="header-section-number">2.2</span> Research plan</a></li>
+  <li><a href="#research-plan" id="toc-research-plan" class="nav-link" data-scroll-target="#research-plan"><span class="header-section-number">2.2</span> Research plan</a>
+  <ul class="collapse">
+  <li><a href="#temporal-aspects" id="toc-temporal-aspects" class="nav-link" data-scroll-target="#temporal-aspects"><span class="header-section-number">2.2.1</span> Temporal aspects</a></li>
+  <li><a href="#geographic-aspects" id="toc-geographic-aspects" class="nav-link" data-scroll-target="#geographic-aspects"><span class="header-section-number">2.2.2</span> Geographic aspects</a></li>
+  <li><a href="#crime-specific-aspects" id="toc-crime-specific-aspects" class="nav-link" data-scroll-target="#crime-specific-aspects"><span class="header-section-number">2.2.3</span> Crime specific aspects</a></li>
+  </ul></li>
   <li><a href="#missing-value-analysis-and-other-inconsistencies" id="toc-missing-value-analysis-and-other-inconsistencies" class="nav-link" data-scroll-target="#missing-value-analysis-and-other-inconsistencies"><span class="header-section-number">2.3</span> Missing value analysis and other inconsistencies</a>
   <ul class="collapse">
   <li><a href="#ny-state-crime-dataset" id="toc-ny-state-crime-dataset" class="nav-link" data-scroll-target="#ny-state-crime-dataset"><span class="header-section-number">2.3.1</span> NY State crime dataset</a></li>
@@ -234,27 +239,42 @@ Describe any patterns you discover in missing values. If no values are missing, 
 -->
 <section id="technical-description" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="technical-description"><span class="header-section-number">2.1</span> Technical Description</h2>
-<p>The dataset on <a href="https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq">Index Crimes by County and Agency in New York</a>, is collected by the New York State Division of Criminal Justice Services, which obtains crime reports from more than 500 New York State police and sheriffs’ departments. The data is formatted in a tabular structure, with columns specifying details like county, agency, year, region, and various crime categories. So, the dataset includes geographic information (county and agency), temporal information (year), and crime categories, and contains roughly 22 thousand rows and 15 columns.</p>
-<p>The reporting system gathers data on seven Index offenses, which are commonly utilized to assess the overall volume of crime. These encompass violent crimes such as murder/non-negligent manslaughter, forcible rape, robbery, and aggravated assault, as well as property crimes like burglary, larceny, and motor vehicle theft.</p>
-<p>The data has been collected since January 1990. The frequency of updates is on an annual basis, but the individual law enforcement agencies monthly report their total crimes to the New York State Division of Criminal Justice Services. Possible issues with the data could include inconsistencies in reporting methods among different agencies, variations in the definition of crimes, or potential underreporting. We should be cautious about these nuances when interpreting trends or making comparisons across regions and time periods. Indeed, police agencies might encounter challenges in reporting, which could hinder accurate or comprehensive data submission. The figures reflect solely the crimes reported to the police and do not encompass the total number of crimes that took place.</p>
-<p>We carefully check that the data is consistent, i.e.&nbsp;that the various accumulations performed within the dataset are correct. We find some inconsistencies in the County Total accumulation in Albany from 1990-1997 and Nassau County in 1990. We discuss this further in the missing values analysis.</p>
-<p>Since comparing crime numbers among the different counties only really makes sense if we normalize by population, we supplement our main dataset, <a href="https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq">Index Crimes by County and Agency in New York</a>, with an official population dataset of the counties in NY state. The <a href="https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k">population dataset</a>, is a dataset curated by the New York State Department of Labor and started in 2014. It has been updated yearly since then, and contains the (estimated) population of each County in NY state by year since 1970.</p>
-<p>The dataset contains the <a href="https://en.wikipedia.org/wiki/Federal_Information_Processing_Standards">FIPS</a> (“Federal Information Processing Standards”) code of each NY state county together with the name of the county (“Geography”), the year and its population estimate. Finally, it includes a column, “Program Type”, detailing the way the population number was estimated. The estimations are interpolations or extrapolations of the 10 year census data of NY State. Before 2010, the estimations are based on interpolations, since for each year in between the actual census data, both previous and next census numbers were known. However, after 2010, the data was kept as point-in-time, and therefore the estimations were based solely on extrapolating the previous census numbers. Notice that it is important to keep the data point-in-time as changing the numbers in hindsight would lead to issues with models that use the extrapolated data numbers.</p>
-<p>The more detailed methodology of the “intercensal estimation” are detailed <a href="https://www.epa.gov/sites/default/files/2015-05/documents/aceappendixb_censusintercensalandpostcensaldata.pdf">here</a> and <a href="https://www2.census.gov/programs-surveys/popest/technical-documentation/methodology/intercensal/2000-2010-intercensal-estimates-methodology.pdf">here</a>. Essentially, for intercensal estimates, they combine the data from the two censuses with death, birth, migration and immigration data to provide an estimate, while for postcensal estimates, they use the previous census data together with the same external sources to provide an estimate.</p>
-<p>We shall investigate the efficacies of these estimates briefly below and notice that the extrapolation is comparatively worse than the intercensal estmated data.</p>
+<p>The dataset on <a href="https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq">Index Crimes by County and Agency in New York</a>, is collected by the New York State Division of Criminal Justice Services, which obtains crime reports from more than 500 New York State police and sheriff’s departments. The data is formatted in a tabular structure, with columns specifying details like county, agency, year, region, and various crime categories. So, the dataset includes geographic information (county and agency), temporal information (year), and crime categories and contains roughly 22 thousand rows and 15 columns.</p>
+<p>The reporting system gathers data on seven Index offenses, commonly used to assess the overall volume of crime. These encompass violent crimes such as murder/non-negligent manslaughter, forcible rape, robbery, and aggravated assault, as well as property crimes like burglary, larceny, and motor vehicle theft.</p>
+<p>The data has been collected since January 1990. The frequency of updates is on an annual basis, but the individual law enforcement agencies report their total crimes to the New York State Division of Criminal Justice Services monthly. Issues with the data include inconsistencies in reporting methods among different agencies, variations in the definition of crimes, or potential underreporting. We should be cautious about these nuances when interpreting trends or comparing regions and periods. Indeed, police agencies might need help with reporting, which could hinder accurate or comprehensive data submission. The figures reflect solely the crimes reported to the police and do not encompass the total number of crimes.</p>
+<p>We carefully check that the data is consistent, i.e., that the various accumulations performed within the dataset are correct. We find some inconsistencies in the County Total accumulation in Albany from 1990-1997 and Nassau County in 1990. We discuss this further in the analysis of the missing values.</p>
+<p>Since comparing crime numbers among the different counties only really makes sense if we normalize by population, we supplement our primary dataset, <a href="https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq">Index Crimes by County and Agency in New York</a>, with an official population dataset of the counties in NY state. The New York State Department of Labor curated the <a href="https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k">population dataset</a>, and started in 2014. It has been updated yearly since then and contains the (estimated) population of each County in NY state by year since 1970.</p>
+<p>The dataset contains the <a href="https://en.wikipedia.org/wiki/Federal_Information_Processing_Standards">FIPS</a> (“Federal Information Processing Standards”) code of each NY state county, together with the name of the county (“Geography”), the year, and its population estimate. Finally, it includes a column, “Program Type,” detailing how the population number was estimated. The estimations are interpolations or extrapolations of the 10-year census data of NY State. Before 2010, the estimations were based on interpolations since for each year, in between the actual census data, both previous and following census numbers were known. However, after 2010, the data was kept as point-in-time, and therefore, the estimations were based solely on extrapolating the previous census numbers. It is essential to keep the data point-in-time, as changing the numbers in hindsight would lead to issues with models that use extrapolated data numbers.</p>
+<p>The more detailed methodology of the “intercensal estimation” is detailed <a href="https://www.epa.gov/sites/default/files/2015-05/documents/aceappendixb_censusintercensalandpostcensaldata.pdf">here</a> and <a href="https://www2.census.gov/programs-surveys/popest/technical-documentation/methodology/intercensal/2000-2010-intercensal-estimates-methodology.pdf">here</a>. Essentially, for intercensal estimates, they combine the data from the two censuses with death, birth, migration, and immigration data to provide an estimate. In contrast, for postcensal forecasts, use the previous census data and the same external sources to provide an estimate.</p>
+<p>We shall briefly investigate the efficacies of these estimates and notice that the extrapolation is comparatively worse than the intercensal estimated data.</p>
 </section>
 <section id="research-plan" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="research-plan"><span class="header-section-number">2.2</span> Research plan</h2>
-<p>To answer research questions related to crime trends and influencing factors, the first dataset offers a rich source of information. Regarding the temporal analysis, we can examine crime rates over multiple years and then can identify trends and patterns. This enables the assessment of whether crime has increased, decreased, or remained stable over time, providing insights into the effectiveness of law enforcement strategies, changes in societal conditions or from the perspective of pre/during/post covid. Moreover, a geographic analysis is also possible. Indeed, the dataset includes information on crimes reported by different counties and agencies. This allows us to compare crime rates across regions, potentially revealing spatial patterns. For example, we can compare the evolution of crime between NYC and NY state. Understanding variations in crime rates helps tailor interventions to specific areas. The dataset is categorized into specific crime types. So, we can analyze trends in each category individually, helping to identify areas of concern and inform targeted interventions. Furthermore, additional demographic information, if available, could be integrated into the analysis. This might involve exploring correlations between crime rates and socioeconomic factors, population density, or demographic shifts over time. We can also assess the impact of law enforcement strategies by analyzing changes in crime rates following the implementation of specific policies or practices. Since the dataset spans several years, we can conduct longitudinal studies, observing changes and trends over extended periods. This can provide a more nuanced understanding of the factors influencing crime dynamics. By comparing data across different agencies or counties, researchers can identify variations in reporting practices, law enforcement effectiveness, or community characteristics that may influence crime rates. However, it’s crucial to acknowledge potential limitations such as data inconsistencies, reporting biases, and missing information, which may affect the robustness of conclusions drawn from the analysis.</p>
+<p>To answer research questions related to crime trends and influencing factors, our primary dataset offers a rich source of information.</p>
+<section id="temporal-aspects" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="temporal-aspects"><span class="header-section-number">2.2.1</span> Temporal aspects</h3>
+<p>Given the extensive span of (thorough reporting) of our primary dataset, we can conduct longitudinal studies, examine crime rates over multiple years, and identify particular trends and patterns. We can do this for all of NY State or County specific and compare trends between counties. For instance, it would be exciting to see whether vastly contrasting trends exist among the different countries.</p>
+<p>Analyzing the data throughout the year enables assessing whether crime has increased, decreased, or remained stable. This could provide insights into the effectiveness of law enforcement strategies, changes in societal conditions, or potential impacts of specific events such as the COVID-19 pandemic. This could give a more nuanced understanding of the factors influencing crime dynamics.</p>
+</section>
+<section id="geographic-aspects" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="geographic-aspects"><span class="header-section-number">2.2.2</span> Geographic aspects</h3>
+<p>A geographic analysis is also possible since our primary dataset contains location-specific information. Indeed, the dataset includes information on crimes reported by different counties and agencies. This allows us to compare crime rates across regions, potentially revealing interesting spatial patterns or clusters. For instance, we can compare the evolution of crime between NYC and NY state. Understanding variations in crime rates helps tailor interventions to specific areas.</p>
+<p>Given the spatial information within the dataset, further supplementing it with demographic information would be interesting. This might involve exploring correlations between crime rates, socioeconomic factors, population density, or demographic shifts over time. Furthermore, if there are contrasting law enforcement strategies among different counties (or even agencies), we could potentially assess the impact of those strategies by analyzing changes in crime rates following the implementation of specific policies or practices. This might allow us to identify variations in reporting practices, law enforcement effectiveness, or community characteristics that may influence crime rates.</p>
+</section>
+<section id="crime-specific-aspects" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="crime-specific-aspects"><span class="header-section-number">2.2.3</span> Crime specific aspects</h3>
+<p>Finally, the dataset is categorized into specific crime types. So, we can analyze trends in each category, helping identify areas of concern and inform targeted interventions for potential hotspots in particular crimes.</p>
+<p>It is crucial to acknowledge potential limitations such as data inconsistencies, reporting biases, and missing information, which may affect the robustness of conclusions drawn from the analysis.</p>
+</section>
 </section>
 <section id="missing-value-analysis-and-other-inconsistencies" class="level2" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="missing-value-analysis-and-other-inconsistencies"><span class="header-section-number">2.3</span> Missing value analysis and other inconsistencies</h2>
-<p>We shall now investigate our two datasets for missing values, inconsistencies and discuss if our findings will impact our research and results.</p>
+<p>We shall now investigate our two datasets for missing values and inconsistencies and discuss if our findings will impact our research and results.</p>
 <section id="ny-state-crime-dataset" class="level3" data-number="2.3.1">
 <h3 data-number="2.3.1" class="anchored" data-anchor-id="ny-state-crime-dataset"><span class="header-section-number">2.3.1</span> NY State crime dataset</h3>
 <p>We start by investigating the NY State crime dataset.</p>
-<p>We find that the data is really well-sourced and only contains NA values for the “Months Reported” column. In particular, upon further investigation, it turns out that a lot of the NA values appear in the accumulated County Total rows, because as soon as an Agency does not indicate the number of months they reported this will lead to an NA value in the accumulation.</p>
-<p>Otherwise, below we have summarized the percentage of NA values in the Months Collected column per county.</p>
+<p>The data is well-sourced and only contains NA values for the “Months Reported” column. In particular, upon further investigation, it turns out that a lot of the NA values appear in the accumulated County Total rows because as soon as an Agency does not indicate the number of months they reported, this will lead to an NA value in the accumulation.</p>
+<p>Below, we have summarized the percentage of NA values in the Months Collected column per county.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -277,8 +297,8 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <p><img src="data_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>We notice that the five counties with the most missing value percentages in the Months Collected column are the ones, where we do not have Agency-level data, only County total data. We believe these numbers were aggregated from different datasets, which may have varying degree of accuracy with respect to their Months collected information.</p>
-<p>While we are not specifically interested in the Months collected column, we need to keep in mind that if for strictly less than 12 months per year data was collected, there might be a skew in the data. We therefore have a quick look at the strictly less than 12 months reported within the non-NA reported values.</p>
+<p>We notice that the five counties with the most missing value percentages in the Months Collected column are the ones where we do not have Agency-level data, only County total data. We believe these numbers were aggregated from different datasets, which may have varying degrees of accuracy concerning their monthly collected information.</p>
+<p>While we are not specifically interested in the “months collected” column, we need to remember that if data was collected for strictly less than 12 months per year, there might be a skew in the data. Therefore, we look at the strictly less than 12 months reported within the non-NA values.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -302,8 +322,8 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <p><img src="data_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>We see that the data with less than 12 months collected compared against the data with exactly 12 months collected is negligible. Based on this, we believe that the missing NA values are mostly due to data collection negligency rather than actually varying number of months collected.</p>
-<p>Apart from the missing values, we wanted to check that the data aggregation was consistent. We first checked that the columns sum to their respective total columns for each row, and find that there is no inconsistency there:</p>
+<p>We see that the data collected with less than 12 months compared against the data collected with precisely 12 months is negligible. Based on this, we believe the missing NA values are primarily due to data collection negligence rather than varying the number of months collected.</p>
+<p>Apart from the missing values, we wanted to check that the data aggregation was consistent. We first checked that the columns sum to their respective total columns for each row and found that there is no inconsistency there:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -347,7 +367,7 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <pre><code>0  rows with mismatch of Burglary + Larceny + Motor.Vehicle.Theft == Property Total Total. </code></pre>
 </div>
 </div>
-<p>Finally, we would also like to check whether there is a mismatch between the County Total accumulation and the individual (by-agency) values. It turns out that for the cases in which we have by-agency data, there is a very minor mismatch between the summed data and the County total data in Nassau in 1990 and in Albany between 1990 and 1997. We conjecture that it might be due to data from a missing agency, but could not verify this.</p>
+<p>Finally, we would also like to check whether there is a mismatch between the County Total accumulation and the individual (by-agency) values. For the cases in which we have by-agency data, there is a minor mismatch between the summed data and the County total data in Nassau in 1990 and Albany between 1990 and 1997. It may be due to data from a missing agency, but we could not verify this explicitly.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -432,12 +452,12 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <p><img src="data_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>In the plot above we compare for each inconsistency the discrepancy in the total crime number. We can observe that the inconsistency is very minor and will not affect our analysis below.</p>
+<p>In the plot above we compare the discrepancy in the total crime number for each inconsistency. We can observe that the inconsistency is very minor and will not affect our analysis below.</p>
 </section>
 <section id="ny-state-population-dataset" class="level3" data-number="2.3.2">
 <h3 data-number="2.3.2" class="anchored" data-anchor-id="ny-state-population-dataset"><span class="header-section-number">2.3.2</span> NY State population dataset</h3>
 <p>We now focus on the <a href="https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k">population dataset</a>.</p>
-<p>We first plot the percentage of the available (i.e.&nbsp;non-NA) data:</p>
+<p>We first plot the percentage of the available (i.e., non-NA) data:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -467,8 +487,8 @@ Describe any patterns you discover in missing values. If no values are missing, 
 </div>
 </div>
 <p>It turns out that we do not have any missing values.</p>
-<p>Nonetheless, as mentioned above, the population datasets contain estimates of the population for the years within/outside of census data. We want to visualize how well these estimations perform, and whether there are large discrepancies with the “actual” (we take the census numbers as the ground truth) population numbers.</p>
-<p>To do so we focus on the numbers for the whole state as a representative. Furthermore, we restrict to data after 1990, as that is the time period for which we have NY State crime data:</p>
+<p>As mentioned above, the population datasets contain population estimates for the years within/outside of census data. We want to visualize how well these estimations perform and whether there are significant discrepancies with the “actual” population numbers (we take the census numbers as the ground truth).</p>
+<p>To do so, we focus on the numbers for the whole state as a representative. Furthermore, we restrict to data after 1990, as that is the period for which we have NY State crime data:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -493,8 +513,8 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <p><img src="data_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>Notice that we have estimates even for the census years (1990, 2000, 2010 and 2020); Their respective bars are split into two (and of different color). The intercensal population estimates are seem like they are quite in line with the census data (which makes sense), while there is a small jump between the 2019 estimate and the 2020 census data. As we remarked above, this dataset was first created in 2014 and kept as point-in-time. Therefore, the estimates will be postcensal for anything after 2010.</p>
-<p>We conclude that the estimates will certainly be good enough for our purposes. The crime/population will divide a small-ish number by a large number and therefore small errors in the population estimate will not affect any conclusions we shall draw in the following.</p>
+<p>Notice that we have estimates even for the census years (1990, 2000, 2010, and 2020); Their respective bars are split into two (and of different colors). The intercensal population estimates are in line with the census data (which makes sense), while there is a small jump between the 2019 estimate and the 2020 census data. As we remarked above, this dataset was created in 2014 and kept as point-in-time. Therefore, the forecast will be postcensal for anything after 2010.</p>
+<p>The estimates will undoubtedly be good enough for our purposes. The crime/population will divide a small number by a large number. Therefore, minor errors in the population estimate will not affect any conclusions we draw in the following.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
