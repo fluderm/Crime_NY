@@ -1,5 +1,22 @@
 # Introduction
 
-test test
+<!-- 
 
-new test
+Explain why you chose this topic, and the questions you are interested in studying. Provide context for readers who are not familiar with the topic.
+
+(suggested: 1 page) 
+
+-->
+
+
+While in the process of deciding on a topic for our project, we received several emails from the Columbia department of Safety about an armed robbery near Columbia campus. This prompted us to get interested in Crime data in and around NYC. We found several very interesting and detailed datasets pertaining to crime in NYC and NY State. We decided to first focus on NY State data, as it provides a more widespread and comprehesive view over the years. We believe that this is an interesting topic due to its insights into crime trends over time and across different areas.
+
+
+
+The first dataset pertains to crime statistics per "Agency" from 1990 to 2022. This allows us to analyze the evolution of crime over the past 33 years per NY county but also to compare the crime statistics between NYC and NY state. In the following we shall explore questions related to crime rates, patterns, and potential influencing factors. For instance, one might investigate the impact of socioeconomic factors, law enforcement strategies, or demographic changes on crime rates. Another interesting question could be the effect of Covid on the crime statistics and crime type. This dataset allows for a comprehensive analysis of public safety trends, aiding policymakers and the public in understanding and addressing crime issues.
+
+
+
+<!--
+#https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k
+-->

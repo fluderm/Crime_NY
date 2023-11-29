@@ -1,0 +1,735 @@
+# Some EDA
+
+# NY state crime data, overview:
+
+```{r}
+library(sf)
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(gifski)
+library(transformr)
+library(dplyr)
+library(ggplot2)
+library(forcats)
+library(gganimate)
+```
+
+## Data Checks:
+
+```{r}
+
+crime_ny <- read.csv("../data/Index_Crimes_by_County_and_Agency__Beginning_1990.csv")
+crime_nyc <- read.csv('../data/NYPD_Shooting_Incident_Data__Historic__20231124.csv')
+pop_ny <- read.csv('../data/Annual_Population_Estimates_for_New_York_State_and_Counties__Beginning_1970.csv')
+pop_ny$FIPS.Code <- substr(pop_ny$FIPS.Code, 3, nchar(pop_ny$FIPS.Code))
+
+county_fips <- data.frame(
+  FIPS = c(
+    "001", "003", "005", "007", "009", "011", "013", "015", "017", "019", "021",
+    "023", "025", "027", "029", "031", "033", "035", "037", "039", "041",
+    "043", "045", "047", "049", "051", "053", "055", "057", "059", "061",
+    "063", "065", "067", "069", "071", "073", "075", "077", "079", "081",
+    "083", "085", "087", "089", "089", "091", "093", "095", "097", "099", "101",
+    "103", "105", "107", "109", "111", "113", "115", "117", "119", "121", "123"
+  ),
+  Name = c(
+    "Albany", "Allegany", "Bronx", "Broome", "Cattaraugus", "Cayuga", "Chautauqua",
+    "Chemung", "Chenango", "Clinton", "Columbia", "Cortland", "Delaware",
+    "Dutchess", "Erie", "Essex", "Franklin", "Fulton", "Genesee", "Greene",
+    "Hamilton", "Herkimer", "Jefferson", "Kings", "Lewis", "Livingston",
+    "Madison", "Monroe", "Montgomery", "Nassau", "New York", "Niagara",
+    "Oneida", "Onondaga", "Ontario", "Orange", "Orleans", "Oswego",
+    "Otsego", "Putnam", "Queens", "Rensselaer", "Richmond", "Rockland",
+    "St. Lawrence", "St Lawrence", "Saratoga", "Schenectady", "Schoharie", "Schuyler",
+    "Seneca", "Steuben", "Suffolk", "Sullivan", "Tioga", "Tompkins",
+    "Ulster", "Warren", "Washington", "Wayne", "Westchester", "Wyoming", "Yates"
+  )
+)
+crime_ny$County <- as.character(crime_ny$County)
+crime_ny_with_fips <- merge(crime_ny, county_fips, by.x = "County", by.y = "Name", all.x = TRUE)
+crime_ny_with_fips <- crime_ny_with_fips[crime_ny_with_fips$Agency == 'County Total', ]
+
+crime_ny_with_fips_and_pop <- merge(crime_ny_with_fips, 
+                                    pop_ny, by.x = c("FIPS", "Year"), 
+                                    by.y = c("FIPS.Code", "Year"), 
+                                    all.x = TRUE)
+crime_ny_with_fips_and_pop <- crime_ny_with_fips_and_pop[!is.na(crime_ny_with_fips_and_pop$Index.Total), ]
+crime_ny_with_fips_and_pop <- crime_ny_with_fips_and_pop[, !(names(crime_ny_with_fips_and_pop) %in% c("Geography", "Program.Type"))]
+
+na_cols <- colSums(is.na(crime_ny_with_fips_and_pop))
+cat("Columns with NA values:", names(na_cols[na_cols>0]), "\n")
+na_rows <- crime_ny_with_fips_and_pop[is.na(crime_ny_with_fips_and_pop[, names(na_cols[na_cols>0])]), ]
+cat("Rows with NA values:", nrow(subset(na_rows, !(Agency == "County Total"))), "\n")
+
+na_cols <- colSums(is.na(crime_ny))
+cat("Columns with NA values:", names(na_cols[na_cols>0]), "\n")
+
+na_rows <- crime_ny[is.na(crime_ny[, names(na_cols[na_cols>0])]), ]
+
+cat("Rows with NA values:", nrow(subset(na_rows, !(Agency == "County Total"))), "\n")
+cat("Newest with NA values:",max((subset(na_rows, !(Agency == "County Total")))$Year), "\n")
+
+head(crime_nyc,5)
+
+```
+
+
+
+
+
+
+# Population dataset:
+
+```{r}
+pop_ny <- read.csv('../data/Annual_Population_Estimates_for_New_York_State_and_Counties__Beginning_1970.csv')
+pop_ny$FIPS.Code <- substr(pop_ny$FIPS.Code, 3, nchar(pop_ny$FIPS.Code))
+
+na_cols <- colSums(is.na(pop_ny))
+cat("Columns with NA values:", names(na_cols[na_cols>0]), "\n")
+
+```
+
+
+
+
+```{r}
+
+pop_ny_full_state <- pop_ny[pop_ny$Geography == 'New York State', ]
+
+population_plot <- ggplot(pop_ny_full_state, 
+                          aes(x = Year, 
+                              y = Population, 
+                              fill = Program.Type)) +
+  geom_col(position = "dodge") +
+  labs(title = "Population per Year", 
+       x = "Year", 
+       y = "Population") +
+  scale_fill_manual(values = c("Census Base Population" = "blue", 
+                              "Postcensal Population Estimate" = "red",
+                              'Intercensal Population Estimate' = 'orange')) +
+  theme_minimal()
+
+plot(population_plot)
+
+```
+
+
+```{r}
+library(tidyr)
+
+
+census_years <- unique(pop_ny_full_state[pop_ny_full_state$Program.Type == 'Census Base Population', ]$Year)
+
+pop_ny_full_state_cens_yrs <- subset(pop_ny_full_state, pop_ny_full_state$Year %in% census_years)
+
+pop_ny_full_state_cens_yrs_wide <- pivot_wider(pop_ny_full_state_cens_yrs, 
+                       names_from = Program.Type, 
+                       values_from = Population)
+colnames(pop_ny_full_state_cens_yrs_wide)
+
+names(pop_ny_full_state_cens_yrs_wide)
+
+ggplot(pop_ny_full_state_cens_yrs_wide, aes(x = Year)) +
+  geom_point(aes(y = `Census Base Population`, color = "Census Base Population"), 
+             position = position_dodge(width = 0.4)) +
+  geom_point(aes(y = `Intercensal Population Estimate`, color = "Intercensal Estimate"), 
+             position = position_dodge(width = 0.2)) +
+  geom_point(aes(y = `Postcensal Population Estimate`, color = "Postcensal Estimate"), 
+             position = position_dodge(width = -0.2)) +
+  labs(title = "A", x = "B", y = "C") +
+  scale_color_manual(values = c("Census Base Population" = "blue", 
+                                "Intercensal Estimate" = "orange",
+                                "Postcensal Estimate" = "red"),
+                     name = "Legend Title") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+
+
+```{r}
+
+# Find mismatch in County Total vs per-police station:
+
+county_total_entries <- crime_ny %>%
+  filter(Agency == "County Total")
+
+columns_to_sum <- c(
+  "Index.Total", "Violent.Total", "Murder", "Rape",
+  "Robbery", "Aggravated.Assault", "Property.Total",
+  "Burglary", "Larceny", "Motor.Vehicle.Theft"
+)
+
+crime_ny_not_ct <- crime_ny[crime_ny$Agency!='County Total',] 
+
+summed_data <- crime_ny_not_ct %>%
+  group_by(Year, County) %>%
+  summarise(across(all_of(columns_to_sum), sum), .groups = "drop")
+
+comparison_result <- left_join(summed_data, 
+                               county_total_entries, 
+                               by = c("Year", "County"))
+
+comparison_result <- comparison_result %>%
+  mutate(
+    Check_Index.Total = ifelse(Index.Total.x == Index.Total.y, "Match", "Mismatch"),
+    Check_Violent.Total = ifelse(Violent.Total.x == Violent.Total.y, "Match", "Mismatch"),
+    Check_Murder = ifelse(Murder.x == Murder.y, "Match", "Mismatch"),
+    Check_Rape = ifelse(Rape.x == Rape.y, "Match", "Mismatch"),
+    Check_Robbery = ifelse(Robbery.x == Robbery.y, "Match", "Mismatch"),
+    Check_Aggravated.Assault = ifelse(Aggravated.Assault.x == Aggravated.Assault.y, "Match", "Mismatch"),
+    Check_Property.Total = ifelse(Property.Total.x == Property.Total.y, "Match", "Mismatch"),
+    Check_Burglary = ifelse(Burglary.x == Burglary.y, "Match", "Mismatch"),
+    Check_Larceny = ifelse(Larceny.x == Larceny.y, "Match", "Mismatch"),
+    Check_Motor.Vehicle.Theft = ifelse(Motor.Vehicle.Theft.x == Motor.Vehicle.Theft.y, "Match", "Mismatch")
+  )
+
+check_columns <- paste0("Check_", columns_to_sum)
+mismatch_rows <- comparison_result %>%
+  rowwise() %>%
+  filter(any(c_across(all_of(check_columns)) == "Mismatch"))
+
+mismatch_rows_long <- tidyr::gather(mismatch_rows, key = "Variable", value = "Check_Value", all_of(check_columns))
+mismatch_rows_long <- mismatch_rows_long[mismatch_rows_long$Check_Value =='Mismatch',] 
+
+variables <- unique(mismatch_rows_long$Variable)
+for (variable in variables) {
+  variable_name <- gsub("^Check_", "", variable)
+  xx <- mismatch_rows_long[mismatch_rows_long$Variable == variable, ]
+  mismatch_rows_long[mismatch_rows_long$Variable == variable,'diff'] <-
+    xx[, paste0(variable_name, ".y")] - xx[, paste0(variable_name, ".x")]
+}
+
+mismatch_rows_long_indextot <- mismatch_rows_long[mismatch_rows_long$Variable == 'Check_Index.Total',]
+
+mismatch_rows_long_indextot_long <- tidyr::pivot_longer(mismatch_rows_long_indextot, 
+                                                       cols = c("Index.Total.x", "Index.Total.y"), 
+                                                       names_to = "Category", 
+                                                       values_to = "Value")
+
+plot <- ggplot(mismatch_rows_long_indextot_long, aes(x = Category, y = Value, fill = Category)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Mismatch Plot for summed up of reported values vs County Total values",
+       fill = "Category") +
+  facet_wrap(~County + Year, scales = "free_y") +
+  theme(legend.position = "none") +
+  ylim(0, max(mismatch_rows_long_indextot$Index.Total.x, mismatch_rows_long_indextot$Index.Total.y) + 500)
+
+print(plot)
+
+mismatch_rows_long_indextot <- subset(mismatch_rows_long_indextot, County=='Albany')
+
+# ggplot(mismatch_rows_long_indextot, aes(x = interaction(Year, County))) +
+#   geom_bar(aes(y = Index.Total.y, fill = "County Total values"), stat = "identity") +
+#   geom_bar(aes(y = Index.Total.x, fill = "Sum of Reported Values by Agencies"), stat = "identity") +
+#   labs(title = "Difference between County total values and summed up provided values for Albany county", 
+#        x = "Year", 
+#        y = "Total Number of Crimes") +
+#   scale_fill_manual(values = c("County Total values" = "red", 
+#                                "Sum of Reported Values by Agencies" = "blue")) +
+#   theme_minimal()+
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+ggplot(mismatch_rows_long_indextot, 
+       aes(x = interaction(Year, County))) +
+  geom_bar(aes(y = Index.Total.y, 
+               fill = "County Total values"), 
+           stat = "identity", 
+           position = "dodge") +
+  geom_bar(aes(y = Index.Total.x, 
+               fill = "Sum of Reported Values by Agencies"), 
+           stat = "identity", 
+           position = "dodge") +
+  labs(title = "Difference between County total values and summed up provided values for Albany county", 
+       x = "Year + County", 
+       y = " Number of Crimes") +
+  scale_fill_manual(values = c("County Total values" = "red", 
+                               "Sum of Reported Values by Agencies" = "blue")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+#subset_data <- mismatch_rows_long[mismatch_rows_long$Variable == 'Check_Index.Total', ]
+#subset_data$diff <- subset_data$Index.Total.x - subset_data$Index.Total.y
+
+```
+
+
+
+
+```{r}
+print(sum(crime_ny[(crime_ny$County=='Nassau') & (crime_ny$Year == 1990) & (crime_ny$Agency != 'County Total'),]$Index.Total))
+print(crime_ny[(crime_ny$County=='Nassau') & (crime_ny$Year == 1990) & (crime_ny$Agency == 'County Total'),]$Index.Total)
+
+crime_ny[(crime_ny$County=='Albany') & (crime_ny$Year == 1990) & (crime_ny$Agency != 'County Total'),]$Index.Total
+crime_ny[(crime_ny$County=='Albany') & (crime_ny$Year == 1991) & (crime_ny$Agency != 'County Total'),]$Index.Total
+
+crime_ny[(crime_ny$County=='Albany') & (crime_ny$Year == 1990) & (crime_ny$Agency == 'County Total'),]
+crime_ny[(crime_ny$County=='Albany') & (crime_ny$Year == 1991) & (crime_ny$Agency == 'County Total'),]
+
+nrow(crime_ny[(crime_ny$County=='Nassau') & (crime_ny$Year == 1991) & (crime_ny$Agency != 'County Total'),])==nrow(crime_ny[(crime_ny$County=='Nassau') & (crime_ny$Year == 1990) & (crime_ny$Agency != 'County Total'),])
+
+for (year in 1990:2022) {
+ cat(year,' and ',nrow(crime_ny[(crime_ny$County=='Albany') & (crime_ny$Year == year) & (crime_ny$Agency != 'County Total'),]),'\n')
+}
+
+alb_1997 <- unique(crime_ny[(crime_ny$County=='Albany') & (crime_ny$Year == 1997) & (crime_ny$Agency != 'County Total'),]$Agency)
+alb_1998 <- unique(crime_ny[(crime_ny$County=='Albany') & (crime_ny$Year == 1998) & (crime_ny$Agency != 'County Total'),]$Agency)
+
+for (ag in alb_1997) {
+  if (!(ag %in% alb_1998)){
+    print(ag)
+  }
+}
+
+crime_ny[(crime_ny$Agency=="Albany County (RR-D and H)"),]
+
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+# Check that other entries sum to Index.Total:
+
+check_result <- county_total_entries %>%
+  group_by(Year, County) %>%
+  summarise(Sum_Other_Entries = sum(Index.Total)) %>%
+  left_join(county_total_entries, by = c("Year", "County")) %>%
+  mutate(Check = ifelse(Sum_Other_Entries == Index.Total, "Pass", "Fail"))
+
+print(nrow(check_result[check_result$Check!='Pass',]))
+
+```
+
+## Some preliminary graphs
+
+```{r}
+
+# kinda useless graphics
+
+ggplot(crime_ny, aes(x = County, y = Index.Total, fill = Index.Total)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Year, scales = "free") +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  labs(title = "Index.Total",
+       x = "County",
+       y = "Index.Total")
+```
+
+### Total crime yearly breakdown in NY stat
+
+```{r}
+
+# total crime per county per year Interesting upswing in 2022 which we should investigate.
+
+crime_ny$Year <- as.numeric(crime_ny$Year)
+
+crime_ny_filtered <- crime_ny %>%
+  mutate(Year_Period = cut(Year, 
+                           breaks = seq(1985, max(Year) + 5, 
+                           by = 5), 
+                           labels = FALSE),
+         Year_Period_Label = paste0(floor((Year - 1985) / 5) * 5 + 1985,
+                                    "-",
+                                    floor((Year - 1985) / 5) * 5 + 1989)
+         )
+
+crime_ny_filtered_county_tot <- crime_ny_filtered[crime_ny_filtered$Agency=='County Total',]
+
+tot_yearly <- crime_ny_filtered_county_tot %>%
+  group_by(Year) %>%
+  summarise(
+    Total_Index = sum(Index.Total)
+  ) %>%
+  ungroup()
+
+ggplot(tot_yearly, aes(x = Year, 
+                      y = Total_Index, 
+                      fill = Total_Index)) +
+  geom_bar(stat = "identity") +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  labs(title = "Index.Total by County (Faceted by 5-Year Intervals)",
+       x = "County",
+       y = "Index.Total")
+
+```
+
+### 5 year total crime by state (top 5 states in each period)
+
+```{r}
+
+# faceted 5-year period / county stats
+
+combined_data <- crime_ny_filtered_county_tot %>%
+  group_by(Year_Period_Label, County) %>%
+  summarise(
+    Total_Index = sum(Index.Total),
+  ) %>%
+  ungroup()
+
+top_5_counts <- combined_data %>%
+  group_by(Year_Period_Label) %>%
+  top_n(5, wt = Total_Index) %>%
+  ungroup()
+
+top_5_counts$County <- fct_reorder(top_5_counts$County, 
+                                   top_5_counts$Total_Index, 
+                                   .desc = TRUE)
+
+top_5_counts <- top_5_counts %>%
+  group_by(Year_Period_Label) %>%
+  mutate(Rank = -rank(Total_Index))
+
+top_5_counts$County <- fct_reorder(top_5_counts$County, top_5_counts$Rank)
+
+
+ggplot(top_5_counts, aes(x = County, 
+                         y = Total_Index, 
+                         fill = Total_Index)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Year_Period_Label, 
+             scales = "free", #"free_x",
+             nrow = 5) +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  labs(title = "Index.Total by County",
+       x = "County",
+       y = "Index.Total")
+```
+
+### Draw heat map maps
+
+```{r}
+
+county_fips <- data.frame(
+  FIPS = c(
+    "001", "005", "007", "009", "011", "013", "015", "017", "019", "021",
+    "023", "025", "027", "029", "031", "033", "035", "037", "039", "041",
+    "043", "045", "047", "049", "051", "053", "055", "057", "059", "061",
+    "063", "065", "067", "069", "071", "073", "075", "077", "079", "081",
+    "083", "085", "087", "089", "091", "093", "095", "097", "099", "101",
+    "103", "105", "107", "109", "111", "113", "115", "117", "119", "121", "123"
+  ),
+  Name = c(
+    "Albany", "Bronx", "Broome", "Cattaraugus", "Cayuga", "Chautauqua",
+    "Chemung", "Chenango", "Clinton", "Columbia", "Cortland", "Delaware",
+    "Dutchess", "Erie", "Essex", "Franklin", "Fulton", "Genesee", "Greene",
+    "Hamilton", "Herkimer", "Jefferson", "Kings", "Lewis", "Livingston",
+    "Madison", "Monroe", "Montgomery", "Nassau", "New York", "Niagara",
+    "Oneida", "Onondaga", "Ontario", "Orange", "Orleans", "Oswego",
+    "Otsego", "Putnam", "Queens", "Rensselaer", "Richmond", "Rockland",
+    "St. Lawrence", "Saratoga", "Schenectady", "Schoharie", "Schuyler",
+    "Seneca", "Steuben", "Suffolk", "Sullivan", "Tioga", "Tompkins",
+    "Ulster", "Warren", "Washington", "Wayne", "Westchester", "Wyoming", "Yates"
+  )
+)
+crime_ny$County <- as.character(crime_ny$County)
+crime_ny_with_fips <- merge(crime_ny, county_fips, by.x = "County", by.y = "Name", all.x = TRUE)
+crime_ny_with_fips <- crime_ny_with_fips[crime_ny_with_fips$Agency == 'County Total', ]
+
+ny_state_boundaries <- st_read("../../tl_2016_36_cousub/tl_2016_36_cousub.shp")
+ny_state_boundaries <- st_transform(ny_state_boundaries, crs = 4326)
+#plot(ny_state_boundaries)t
+
+ny_state_boundaries$COUNTYFP <- as.character(ny_state_boundaries$COUNTYFP)
+crime_ny_with_fips$FIPS <- as.character(crime_ny_with_fips$FIPS)
+
+crime_ny_merged <- merge(ny_state_boundaries, crime_ny_with_fips, by.x = "COUNTYFP", by.y = "FIPS")
+crime_ny_sf <- st_as_sf(crime_ny_merged, coords = c("Longitude", "Latitude"), crs = 4326)
+
+xx <- subset(crime_ny_sf, Year == 2020)
+
+ggplot(xx, aes(fill = Index.Total)) +
+  geom_sf(color = "black") +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  labs(title = paste("Index.Total by County (Year:", 2020, ")"),
+       fill = "Index.Total")
+
+```
+
+```{r}
+
+
+filtered_data <- crime_ny_sf # subset(crime_ny_sf, (Year < 2015) & (Year > 2010))
+
+plots <- lapply(unique(filtered_data$Year), function(year) {
+ggplot(subset(filtered_data, Year == year), aes(fill = Index.Total)) +
+  geom_sf(color = "black") +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  labs(title = paste("Index.Total by County (Year:", year, ")"),
+       fill = "Index.Total")
+})
+
+#plots
+
+```
+
+### Animate image --\> create gif (takes a while to evaluate)
+
+```{r}
+library(ggplot2)
+library(gganimate)
+library(viridis)
+library(magick)
+
+ny_state_boundaries <- st_read("../../tl_2016_36_cousub/tl_2016_36_cousub.shp")
+ny_state_boundaries <- st_transform(ny_state_boundaries, crs = 4326)
+#plot(ny_state_boundaries)t
+
+ny_state_boundaries$COUNTYFP <- as.character(ny_state_boundaries$COUNTYFP)
+crime_ny_with_fips$FIPS <- as.character(crime_ny_with_fips$FIPS)
+
+crime_ny_merged <- merge(ny_state_boundaries, crime_ny_with_fips_and_pop, by.x = "COUNTYFP", by.y = "FIPS")
+crime_ny_merged$crimeperpop <- crime_ny_merged$Index.Total/crime_ny_merged$Population
+crime_ny_sf <- st_as_sf(crime_ny_merged, coords = c("Longitude", "Latitude"), crs = 4326)
+
+#crime_ny_with_fips_and_pop
+
+desired_crs <- 4326
+filtered_data <- crime_ny_sf
+dir.create("animation_frames", showWarnings = FALSE)
+
+legend_breaks <- seq(min(filtered_data$crimeperpop), max(filtered_data$crimeperpop), length.out = 5)
+legend_labels <- scales::number_format(scale = 100, suffix = "%")(legend_breaks)
+
+scale_limits <- c(0, max(filtered_data$crimeperpop) * .5)
+
+template_plot <- ggplot(filtered_data, aes(fill = crimeperpop)) +
+  geom_sf(color = "black") +
+  scale_fill_viridis_c(breaks = legend_breaks, 
+                       labels = legend_labels, 
+                       option = "viridis_div",
+                       limits = scale_limits) +  # Set limits for the color scale
+  theme_minimal() +
+  labs(title = "Crime/pop by County", fill = "Crime/Pop")
+
+ggsave("animation_frames/template_plot.png", 
+       template_plot, 
+       width = 6, 
+       height = 6, 
+       dpi = 100)
+
+for (year in unique(filtered_data$Year)) {
+  plot_data <- subset(filtered_data, Year == year)
+  plot <- template_plot + 
+    geom_sf(data = plot_data) +
+    labs(title = paste("Crime/Pop by County (Year:", year, ")"))
+  
+  ggsave(filename = paste0("animation_frames/frame_", year, ".png"), plot, width = 6, height = 6, dpi = 100)
+}
+
+png_files <- list.files("animation_frames", pattern = "frame_\\d+\\.png", full.names = TRUE)
+frames <- image_read(png_files)
+
+animation_file <- "animated_plot.gif"
+fps <- 2
+width <- 800
+height <- 800
+
+animation <- image_animate(frames, fps = fps)
+image_write(animation, path = animation_file)
+
+#image_write(frames, path = animation_file, format = "gif", fps = 1)
+#unlink("animation_frames", recursive = TRUE)
+
+# desired_crs <- 4326
+# filtered_data <- crime_ny_sf
+# dir.create("animation_frames", showWarnings = FALSE)
+# 
+# for (year in unique(filtered_data$Year)) {
+#   plot_data <- subset(filtered_data, Year == year)
+#   plot <- ggplot() +
+#     geom_sf(data = plot_data, aes(fill = Index.Total), color = "black") +
+#     scale_fill_viridis_c() +
+#     theme_minimal() +
+#     labs(title = paste("Index.Total by County (Year:", year, ")"), fill = "Index.Total")
+#   
+#   ggsave(filename = paste0("animation_frames/frame_", year, ".png"), plot, width = 6, height = 6, dpi = 100)
+# }
+# 
+# png_files <- list.files("animation_frames", pattern = "frame_\\d+\\.png", full.names = TRUE)
+# frames <- image_read(png_files)
+# 
+# animation_file <- "animated_plot.gif"
+# fps <- 2
+# width <- 800
+# height <- 800
+# 
+# animation <- image_animate(frames, fps = fps)
+# image_write(animation, path = animation_file)
+
+#image_write(frames, path = animation_file, format = "gif", fps = 1)
+#unlink("animation_frames", recursive = TRUE)
+```
+
+```{r}
+
+# crime_ny_sf$Year <- as.numeric(crime_ny_sf$Year)
+# 
+# animated_plot <- ggplot(filtered_data, aes(fill = Index.Total)) +
+#   geom_sf(color = "black") +
+#   scale_fill_viridis_c() +
+#   theme_minimal() +
+#   transition_states(Year, 
+#                     transition_length = 1, 
+#                     state_length = 1, 
+#                     wrap = TRUE) +
+#   enter_fade() +
+#   exit_fade() +
+#   labs(title = "Index.Total by County (Year: {frame_time})", fill = "Index.Total")
+# 
+# 
+# anim_save("animated_plot.gif", animated_plot, renderer = gifski_renderer())
+
+```
+
+```{r}
+#some checks:
+# st_crs(ny_state_boundaries)==st_crs(crime_ny_sf)
+# print(sum(st_is_empty(ny_state_boundaries)))
+# print(sum(st_is_empty(crime_ny_sf)))
+# print(sum(!st_is_valid(ny_state_boundaries)))
+# print(sum(!st_is_valid(crime_ny_sf)))
+```
+
+------------------------------------------------------------------------
+
+# NYC shooting incident data
+
+## Some data checks
+
+```{r}
+crime_nyc <- read.csv('../data/NYPD_Shooting_Incident_Data__Historic__20231124.csv')
+
+crime_nyc$OCCUR_DATE <- as.Date(crime_nyc$OCCUR_DATE, format = '%m/%d/%Y')
+
+na_cols <- colSums(is.na(crime_nyc))
+cat("Columns with NA values:", names(na_cols[na_cols>0]), "\n")
+
+# drop juristiction code alltogether
+
+crime_nyc <- subset(crime_nyc, select = -JURISDICTION_CODE)
+na_cols <- colSums(is.na(crime_nyc))
+na_rows <- crime_nyc[is.na(crime_nyc[, names(na_cols[na_cols>0])]), ]
+
+print(head(na_rows,30))
+
+# mostly empty rows -- two incidences have missing jurisdiction_code, but we don't really care about that.
+
+#cat("Rows with NA values:", nrow(subset(na_rows, !(Agency == "County Total"))), "\n")
+#cat("Newest with NA values:",max((subset(na_rows, !(Agency == "County Total")))$Year), "\n")
+
+head(crime_nyc,5)
+```
+
+```{r}
+missing_percentage <- sapply(crime_nyc, 
+                             function(x) sum(is.na(x) | x == "") / length(x) * 100)
+result <- data.frame(Column = names(missing_percentage), 
+                     MissingPercentage = missing_percentage)
+result <- result[order(-result$MissingPercentage), ]
+print(result)
+```
+
+## preliminary graphs
+
+## different maps:
+
+### Leaflet plot:
+
+```{r}
+
+library(leaflet)
+library(sf)
+
+crime_nyc_nona <- crime_nyc[complete.cases(crime_nyc$Longitude, crime_nyc$Latitude), ]
+nyc_map <- leaflet() %>%
+  setView(lng = -73.94, lat = 40.70, zoom = 10) 
+
+crime_nyc_sf <- st_as_sf(crime_nyc_nona, 
+                         coords = c("Longitude", "Latitude"), 
+                         crs = 4326)
+
+crime_nyc_sf <- crime_nyc_sf
+
+nyc_map <- nyc_map %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addCircleMarkers(
+    data = crime_nyc_sf, 
+    color = "blue", 
+    radius = 0, 
+    opacity = 0.3,
+    fillOpacity = 1,
+    stroke = FALSE,
+    popup = ~paste("Date: ", crime_nyc_sf$OCCUR_DATE, "<br>", "Time: ", crime_nyc_sf$OCCUR_TIME)
+  )
+
+# Display the map
+nyc_map
+
+```
+
+### Various heatmaps (different technique):
+
+```{r}
+
+library(ggplot2)
+library(sp)
+library(sf)
+
+#shapefile=readOGR("shapefiles","nyu_2451_34490.shp")
+
+dsn <- "nyu_2451_34490.shp"
+nyc_boundaries <- st_read('../../nyc_election_districts/nyc_election_districts.shp')
+
+#plot(nyc_boundaries)
+
+crime_nyc_sf <- st_as_sf(crime_nyc_nona, coords = c("Longitude", "Latitude"), crs = 4326)
+
+ggplot() +
+  geom_sf(data = nyc_boundaries, fill = "white", color = "black") +
+  geom_point(data = crime_nyc_nona, aes(x = Longitude, y = Latitude), 
+             color = "yellow", 
+             size = 0.01, 
+             alpha = 0.08) +
+  #geom_density_2d(data = crime_nyc_nona, aes(x = Longitude, y = Latitude)) +
+  geom_density_2d_filled(data = crime_nyc_nona, aes(x = Longitude, y = Latitude),alpha = 0.85) +
+  theme_minimal()
+
+```
+
+```{r}
+
+#last 10 yrs
+
+crime_nyc_nona$OCCUR_DATE <- as.Date(crime_nyc_nona$OCCUR_DATE, format = '%m/%d/%Y')
+crime_nyc_nona_last10 <- subset(crime_nyc_nona, OCCUR_DATE >= as.Date('2022-01-01'))
+
+crime_nyc_sf <- st_as_sf(crime_nyc_nona_last10, coords = c("Longitude", "Latitude"), crs = 4326)
+
+ggplot() +
+  geom_sf(data = nyc_boundaries, fill = "white", color = "black") +
+  #geom_density_2d(data = crime_nyc_nona, aes(x = Longitude, y = Latitude)) +
+  geom_density_2d_filled(data = crime_nyc_nona_last10, aes(x = Longitude, y = Latitude),alpha = 0.85) +
+  theme_minimal()
+```
+
+```{r}
+ggplot() +
+  geom_sf(data = nyc_boundaries, fill = "white", color = "black") +
+  geom_point(data = crime_nyc_nona_last10, aes(x = Longitude, y = Latitude), 
+             color = "red", 
+             size = .5, 
+             alpha = 0.4)
+```
