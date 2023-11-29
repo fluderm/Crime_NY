@@ -8,7 +8,7 @@
 
 <meta name="author" content="Elie Chemouni (ec3778)">
 <meta name="author" content="Martin Fluder (mf3590)">
-<meta name="dcterms.date" content="2023-11-24">
+<meta name="dcterms.date" content="2023-11-29">
 
 <title>Crime in NY</title>
 <style>
@@ -171,7 +171,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 24, 2023</p>
+      <p class="date">November 29, 2023</p>
     </div>
   </div>
   
@@ -183,7 +183,26 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="introduction" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
-<p>test test</p>
+<!-- 
+
+Explain why you chose this topic, and the questions you are interested in studying. Provide context for readers who are not familiar with the topic.
+
+(suggested: 1 page) 
+
+-->
+<p>While deciding on a topic for our project, we received several emails from the Columbia Department of Safety about an armed robbery near the Columbia campus. This prompted us to get interested in Crime data in and around NYC – in particular; it made us question the safety around Columbia and NYC. We found several exciting and detailed datasets about crime in NYC and quickly focused on <a href="https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8">NYC incident-level shooting</a> data in the past ten years to see how much “danger” we are:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>(This plot is just for "motivational" purposes. In the main body of the text we shall focus on a different dataset.)</p>
+<p>Indeed, it seems like there is a relative “hotspot” of shooting incidences near Columbia. The hotspot is mostly several blocks from campus, but it is broadly insightful to know which areas to avoid.</p>
+<p>This first broad analysis took us down a rabbit hole of crime and crime-related datasets. We eventually decided to focus on NY State data, as it provides a less localized, more widespread, and comprehensive view of crimes over the years. Furthermore, NY State seems more representative of drastically different styles of living, which – we believe – allows for a more contrasting picture. This topic is attractive due to its insights into crime trends over time and across different areas.</p>
+<p>Our primary dataset pertains to crime statistics per NY State County “Agency” from 1990 to 2022. This allows us to analyze the evolution of crime over the past ~30 years per NY county and compare the crime statistics between NYC and NY state. In the following, we shall explore questions related to crime rates, patterns, and potential influencing factors. For instance, one might investigate the impact of socioeconomic factors, law enforcement strategies, or demographic changes on crime rates. Another interesting question could be the effect of COVID-19 on the crime statistics and type. This dataset allows for a comprehensive analysis of public safety trends, aiding policymakers and the public in understanding and addressing crime issues. Additionally, we supplement our primary dataset with data providing population numbers per county in NY State, as we eventually want to compare crime rates per population size.</p>
+<!--
+#https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k
+-->
 
 
 </section>

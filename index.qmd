@@ -1,3 +1,55 @@
 # Introduction
 
-We choose to work on New York state crime data. This topic is valuable for study due to its insights into crime trends over time and across different areas. The first chosen dataset allows us to analyze the evolution of crime over the past 33 years per NY county but also to compare the crime statistics between NYC and NY state. We can explore questions related to crime rates, patterns, and potential influencing factors. For instance, one might investigate the impact of socioeconomic factors, law enforcement strategies, or demographic changes on crime rates. Another interesting question could be the effect of covid on the crime statistics. This dataset allows for a comprehensive analysis of public safety trends, aiding policymakers and the public in understanding and addressing crime issues.
+
+<!-- 
+
+Explain why you chose this topic, and the questions you are interested in studying. Provide context for readers who are not familiar with the topic.
+
+(suggested: 1 page) 
+
+-->
+
+
+While deciding on a topic for our project, we received several emails from the Columbia Department of Safety about an armed robbery near the Columbia campus. This prompted us to get interested in Crime data in and around NYC – in particular; it made us question the safety around Columbia and NYC. We found several exciting and detailed datasets about crime in NYC and quickly focused on [NYC incident-level shooting](https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8) data in the past ten years to see how much “danger” we are:
+
+
+```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
+
+library(ggplot2)
+library(sp)
+library(sf)
+library(RColorBrewer)
+
+
+crime_nyc <- read.csv('../data/NYPD_Shooting_Incident_Data__Historic__20231124.csv')
+crime_nyc$OCCUR_DATE <- as.Date(crime_nyc$OCCUR_DATE, format = '%m/%d/%Y')
+
+crime_nyc_nona <- crime_nyc[complete.cases(crime_nyc$Longitude, crime_nyc$Latitude), ]
+crime_nyc_nona <- subset(crime_nyc_nona, select = -JURISDICTION_CODE)
+crime_nyc_nona <- crime_nyc_nona[(crime_nyc_nona$OCCUR_DATE > as.Date('2015-01-01')), ]
+
+nyc_boundaries <- st_read('../nyc_election_districts/nyc_election_districts.shp')
+crime_nyc_sf <- st_as_sf(crime_nyc_nona, coords = c("Longitude", "Latitude"), crs = 4326)
+
+ggplot() +
+  geom_sf(data = nyc_boundaries, 
+          fill = "lightblue",
+          color = "black") +
+  geom_density_2d_filled(data = crime_nyc_nona, 
+                         aes(x = Longitude, y = Latitude),
+                         alpha = 0.85) +
+  labs(title = "Density Plot of Number of shootings in NYC from 2015 - 2022") +
+  theme_minimal()
+
+```
+(This plot is just for \"motivational\" purposes. In the main body of the text we shall focus on a different dataset.)
+
+Indeed, it seems like there is a relative “hotspot” of shooting incidences near Columbia. The hotspot is mostly several blocks from campus, but it is broadly insightful to know which areas to avoid.
+
+This first broad analysis took us down a rabbit hole of crime and crime-related datasets. We eventually decided to focus on NY State data, as it provides a less localized, more widespread, and comprehensive view of crimes over the years. Furthermore, NY State seems more representative of drastically different styles of living, which – we believe – allows for a more contrasting picture. This topic is attractive due to its insights into crime trends over time and across different areas.
+
+Our primary dataset pertains to crime statistics per NY State County “Agency” from 1990 to 2022. This allows us to analyze the evolution of crime over the past ~30 years per NY county and compare the crime statistics between NYC and NY state. In the following, we shall explore questions related to crime rates, patterns, and potential influencing factors. For instance, one might investigate the impact of socioeconomic factors, law enforcement strategies, or demographic changes on crime rates. Another interesting question could be the effect of COVID-19 on the crime statistics and type. This dataset allows for a comprehensive analysis of public safety trends, aiding policymakers and the public in understanding and addressing crime issues. Additionally, we supplement our primary dataset with data providing population numbers per county in NY State, as we eventually want to compare crime rates per population size.
+
+<!--
+#https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k
+-->
