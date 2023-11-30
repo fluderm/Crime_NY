@@ -365,8 +365,7 @@ tot_yearly <- crime_ny_filtered_county_tot %>%
   ungroup()
 
 ggplot(tot_yearly, aes(x = Year, 
-                      y = Total_Index, 
-                      fill = Total_Index)) +
+                      y = Total_Index)) +
   geom_bar(stat = "identity") +
   scale_fill_viridis_c() +
   theme_minimal() +

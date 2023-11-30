@@ -240,21 +240,21 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <section id="technical-description" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="technical-description"><span class="header-section-number">2.1</span> Technical Description</h2>
 <p>The dataset on <a href="https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq">Index Crimes by County and Agency in New York</a>, is collected by the New York State Division of Criminal Justice Services, which obtains crime reports from more than 500 New York State police and sheriff’s departments. The data is formatted in a tabular structure, with columns specifying details like county, agency, year, region, and various crime categories. So, the dataset includes geographic information (county and agency), temporal information (year), and crime categories and contains roughly 22 thousand rows and 15 columns.</p>
-<p>The reporting system gathers data on seven Index offenses, commonly used to assess the overall volume of crime. These encompass violent crimes such as murder/non-negligent manslaughter, forcible rape, robbery, and aggravated assault, as well as property crimes like burglary, larceny, and motor vehicle theft.</p>
+<p>The reporting system gathers data on seven “index offenses”, commonly used to assess the overall volume of crime. These encompass violent crimes such as murder/non-negligent manslaughter, forcible rape, robbery, and aggravated assault, as well as property crimes like burglary, larceny, and motor vehicle theft.</p>
 <p>The data has been collected since January 1990. The frequency of updates is on an annual basis, but the individual law enforcement agencies report their total crimes to the New York State Division of Criminal Justice Services monthly. Issues with the data include inconsistencies in reporting methods among different agencies, variations in the definition of crimes, or potential underreporting. We should be cautious about these nuances when interpreting trends or comparing regions and periods. Indeed, police agencies might need help with reporting, which could hinder accurate or comprehensive data submission. The figures reflect solely the crimes reported to the police and do not encompass the total number of crimes.</p>
 <p>We carefully check that the data is consistent, i.e., that the various accumulations performed within the dataset are correct. We find some inconsistencies in the County Total accumulation in Albany from 1990-1997 and Nassau County in 1990. We discuss this further in the analysis of the missing values.</p>
-<p>Since comparing crime numbers among the different counties only really makes sense if we normalize by population, we supplement our primary dataset, <a href="https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq">Index Crimes by County and Agency in New York</a>, with an official population dataset of the counties in NY state. The New York State Department of Labor curated the <a href="https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k">population dataset</a>, and started in 2014. It has been updated yearly since then and contains the (estimated) population of each County in NY state by year since 1970.</p>
-<p>The dataset contains the <a href="https://en.wikipedia.org/wiki/Federal_Information_Processing_Standards">FIPS</a> (“Federal Information Processing Standards”) code of each NY state county, together with the name of the county (“Geography”), the year, and its population estimate. Finally, it includes a column, “Program Type,” detailing how the population number was estimated. The estimations are interpolations or extrapolations of the 10-year census data of NY State. Before 2010, the estimations were based on interpolations since for each year, in between the actual census data, both previous and following census numbers were known. However, after 2010, the data was kept as point-in-time, and therefore, the estimations were based solely on extrapolating the previous census numbers. It is essential to keep the data point-in-time, as changing the numbers in hindsight would lead to issues with models that use extrapolated data numbers.</p>
-<p>The more detailed methodology of the “intercensal estimation” is detailed <a href="https://www.epa.gov/sites/default/files/2015-05/documents/aceappendixb_censusintercensalandpostcensaldata.pdf">here</a> and <a href="https://www2.census.gov/programs-surveys/popest/technical-documentation/methodology/intercensal/2000-2010-intercensal-estimates-methodology.pdf">here</a>. Essentially, for intercensal estimates, they combine the data from the two censuses with death, birth, migration, and immigration data to provide an estimate. In contrast, for postcensal forecasts, use the previous census data and the same external sources to provide an estimate.</p>
-<p>We shall briefly investigate the efficacies of these estimates and notice that the extrapolation is comparatively worse than the intercensal estimated data.</p>
+<p>Since comparing crime numbers among the different counties only really makes sense if we normalize by population, we supplement our primary dataset, <a href="https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq">Index Crimes by County and Agency in New York</a>, with an official population dataset of the counties in NY state. The New York State Department of Labor curated the <a href="https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k">population dataset</a>. It has been updated yearly since 2014 and contains the (estimated) population of each County in NY state by year since 1970.</p>
+<p>The dataset contains the <a href="https://en.wikipedia.org/wiki/Federal_Information_Processing_Standards">FIPS</a> (“Federal Information Processing Standards”) code of each NY state county, together with the name of the county (“Geography”), the year, and its population estimate. Finally, it includes a column, “Program Type,” detailing how the population number was estimated. The estimations are interpolations or extrapolations of the 10-year census data of NY State. Before 2010, the estimations were based on interpolations since for each year, in between the actual census data, both previous and following census numbers were known. However, after 2010, the data was kept as “point-in-time,” and therefore, the estimations were based solely on extrapolating the previous census numbers. It is essential to keep the data point-in-time, as changing the numbers in hindsight would lead to issues with models that use extrapolated data numbers.</p>
+<p>The more detailed methodology of the “intercensal estimation” is detailed <a href="https://www.epa.gov/sites/default/files/2015-05/documents/aceappendixb_censusintercensalandpostcensaldata.pdf">here</a> and <a href="https://www2.census.gov/programs-surveys/popest/technical-documentation/methodology/intercensal/2000-2010-intercensal-estimates-methodology.pdf">here</a>. Essentially, for intercensal estimates, they combine the data from the two censuses with death, birth, migration, and immigration data to provide an estimate. In contrast, for postcensal forecasts, they use the previous census data and the same external sources to provide an estimate.</p>
+<p>We shall briefly investigate the efficacies of these estimates and notice that the extrapolation is comparatively worse than the intercensal estimated data, but that for our purposes the estimation errors are negligible.</p>
 </section>
 <section id="research-plan" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="research-plan"><span class="header-section-number">2.2</span> Research plan</h2>
 <p>To answer research questions related to crime trends and influencing factors, our primary dataset offers a rich source of information.</p>
 <section id="temporal-aspects" class="level3" data-number="2.2.1">
 <h3 data-number="2.2.1" class="anchored" data-anchor-id="temporal-aspects"><span class="header-section-number">2.2.1</span> Temporal aspects</h3>
-<p>Given the extensive span of (thorough reporting) of our primary dataset, we can conduct longitudinal studies, examine crime rates over multiple years, and identify particular trends and patterns. We can do this for all of NY State or County specific and compare trends between counties. For instance, it would be exciting to see whether vastly contrasting trends exist among the different countries.</p>
-<p>Analyzing the data throughout the year enables assessing whether crime has increased, decreased, or remained stable. This could provide insights into the effectiveness of law enforcement strategies, changes in societal conditions, or potential impacts of specific events such as the COVID-19 pandemic. This could give a more nuanced understanding of the factors influencing crime dynamics.</p>
+<p>Given the extensive span of thorough reporting within our primary dataset, we can conduct longitudinal studies, examine crime rates over multiple years, and identify particular trends and patterns. We can do this for all of NY State or county specific and compare trends between counties. For instance, it would be exciting to see whether vastly contrasting trends exist among the different counties.</p>
+<p>Analyzing the data throughout the years enables assessing whether crime has increased, decreased, or remained stable. This could provide insights into the effectiveness of law enforcement strategies, changes in societal conditions, or potential impacts of specific events such as the COVID-19 pandemic. This could give a more nuanced understanding of the factors influencing crime dynamics.</p>
 </section>
 <section id="geographic-aspects" class="level3" data-number="2.2.2">
 <h3 data-number="2.2.2" class="anchored" data-anchor-id="geographic-aspects"><span class="header-section-number">2.2.2</span> Geographic aspects</h3>
@@ -263,7 +263,7 @@ Describe any patterns you discover in missing values. If no values are missing, 
 </section>
 <section id="crime-specific-aspects" class="level3" data-number="2.2.3">
 <h3 data-number="2.2.3" class="anchored" data-anchor-id="crime-specific-aspects"><span class="header-section-number">2.2.3</span> Crime specific aspects</h3>
-<p>Finally, the dataset is categorized into specific crime types. So, we can analyze trends in each category, helping identify areas of concern and inform targeted interventions for potential hotspots in particular crimes.</p>
+<p>Finally, the dataset is categorized into specific crime types. This allows us to analyze trends in each category, helping identify areas of concern and inform targeted interventions for potential hotspots in particular crimes.</p>
 <p>It is crucial to acknowledge potential limitations such as data inconsistencies, reporting biases, and missing information, which may affect the robustness of conclusions drawn from the analysis.</p>
 </section>
 </section>
@@ -273,7 +273,7 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <section id="ny-state-crime-dataset" class="level3" data-number="2.3.1">
 <h3 data-number="2.3.1" class="anchored" data-anchor-id="ny-state-crime-dataset"><span class="header-section-number">2.3.1</span> NY State crime dataset</h3>
 <p>We start by investigating the NY State crime dataset.</p>
-<p>The data is well-sourced and only contains NA values for the “Months Reported” column. In particular, upon further investigation, it turns out that a lot of the NA values appear in the accumulated County Total rows because as soon as an Agency does not indicate the number of months they reported, this will lead to an NA value in the accumulation.</p>
+<p>The data is well-sourced and only contains NA values for the “Months Reported” column. In particular, upon further investigation, it turns out that a lot of the NA values appear in the accumulated “County Total” rows because as soon as an Agency does not indicate the number of months they reported, this will lead to an NA value in the accumulation.</p>
 <p>Below, we have summarized the percentage of NA values in the Months Collected column per county.</p>
 <div class="cell">
 <details>
@@ -287,43 +287,53 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>na_rows_cnt <span class="ot">&lt;-</span> na_rows_cnt[<span class="fu">order</span>(na_rows_cnt<span class="sc">$</span>pct, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(na_rows_cnt, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(County, <span class="sc">-</span>pct), <span class="at">y =</span> pct)) <span class="sc">+</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Percentage of Missing </span><span class="sc">\"</span><span class="st">Months Collected</span><span class="sc">\"</span><span class="st"> Values by County"</span>,</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"County"</span>, <span class="at">y =</span> <span class="st">"Percentage"</span>) <span class="sc">+</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(na_rows_cnt, </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(County, <span class="sc">-</span>pct), </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> pct <span class="sc">*</span> <span class="dv">100</span>)) <span class="sc">+</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Percentage of Missing </span><span class="sc">\"</span><span class="st">Months Collected</span><span class="sc">\"</span><span class="st"> Values by County"</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"County"</span>, <span class="at">y =</span> <span class="st">"Missing Percentage"</span>) <span class="sc">+</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(<span class="at">scale =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="data_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>We notice that the five counties with the most missing value percentages in the Months Collected column are the ones where we do not have Agency-level data, only County total data. We believe these numbers were aggregated from different datasets, which may have varying degrees of accuracy concerning their monthly collected information.</p>
-<p>While we are not specifically interested in the “months collected” column, we need to remember that if data was collected for strictly less than 12 months per year, there might be a skew in the data. Therefore, we look at the strictly less than 12 months reported within the non-NA values.</p>
+<p>We notice that the five counties with the most missing value percentages in the “Months Collected” column are the ones where we do not have Agency-level data, but only “County Total” data. We believe these numbers were aggregated from different datasets, which may have varying degrees of accuracy concerning their monthly collected information.</p>
+<p>While we are not specifically interested in the “months collected” column, we need to remember that if data was consistentlycollected for strictly less than 12 months per year, there might be a skew in the data. To get an estimate of how often we are dealing with data from less than 12 months (for the NA cases), we look at the respective fraction within the non-NA values.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>less_12 <span class="ot">&lt;-</span> crime_ny[(crime_ny<span class="sc">$</span>Months.Reported <span class="sc">&lt;</span> <span class="dv">12</span>) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(crime_ny<span class="sc">$</span>Months.Reported), ]</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>less_12_cnt <span class="ot">&lt;-</span> less_12 <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(County) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>())</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>no_na_crime_ny_cnt <span class="ot">&lt;-</span> crime_ny[<span class="sc">!</span><span class="fu">is.na</span>(crime_ny<span class="sc">$</span>Months.Reported), ] <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(County) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>())</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> <span class="fu">merge</span>(less_12_cnt, no_na_crime_ny_cnt, <span class="at">by =</span> <span class="st">"County"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>merged_data<span class="sc">$</span>pct <span class="ot">&lt;-</span> merged_data<span class="sc">$</span>Count.x<span class="sc">/</span>merged_data<span class="sc">$</span>Count.y</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> merged_data[<span class="fu">order</span>(merged_data<span class="sc">$</span>pct, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(merged_data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(County, <span class="sc">-</span>pct), <span class="at">y =</span> pct)) <span class="sc">+</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Percentage of &lt;12 vs =12</span><span class="sc">\"</span><span class="st">Months Collected</span><span class="sc">\"</span><span class="st"> by County"</span>,</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"County"</span>, </span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Percentage of &lt;12 vs =12 Months Collected"</span>) <span class="sc">+</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>less_12_cnt <span class="ot">&lt;-</span> less_12 <span class="sc">%&gt;%</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(County) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>())</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>no_na_crime_ny_cnt <span class="ot">&lt;-</span> crime_ny[<span class="sc">!</span><span class="fu">is.na</span>(crime_ny<span class="sc">$</span>Months.Reported), ] <span class="sc">%&gt;%</span> </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(County) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>())</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> <span class="fu">merge</span>(less_12_cnt, no_na_crime_ny_cnt, <span class="at">by =</span> <span class="st">"County"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>merged_data<span class="sc">$</span>pct <span class="ot">&lt;-</span> merged_data<span class="sc">$</span>Count.x<span class="sc">/</span>merged_data<span class="sc">$</span>Count.y</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> merged_data[<span class="fu">order</span>(merged_data<span class="sc">$</span>pct, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(merged_data, </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(County, <span class="sc">-</span>pct), </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> <span class="dv">100</span><span class="sc">*</span>pct)) <span class="sc">+</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Percentage of &lt;12 vs 12 </span><span class="sc">\"</span><span class="st">Months Collected</span><span class="sc">\"</span><span class="st"> by County"</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"County"</span>, </span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Percentage of &lt;12 vs 12 Months Collected"</span>) <span class="sc">+</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(<span class="at">scale =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="data_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>We see that the data collected with less than 12 months compared against the data collected with precisely 12 months is negligible. Based on this, we believe the missing NA values are primarily due to data collection negligence rather than varying the number of months collected.</p>
-<p>Apart from the missing values, we wanted to check that the data aggregation was consistent. We first checked that the columns sum to their respective total columns for each row and found that there is no inconsistency there:</p>
+<p>We observe that the data collected with less than 12 months compared against the data collected with precisely 12 months is relatively negligible. Based on this, we believe the missing NA values are primarily due to data collection negligence rather than drastic variations of the number of months data was reported/collected.</p>
+<p>Apart from the missing values, we wanted to make sure that the data aggregation was performed consistently within the dataset. We first check that the columns sum to their respective total columns for each row and find that there is no inconsistency there:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -361,10 +371,10 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Sum_Other_Entries =</span> Burglary <span class="sc">+</span> Larceny <span class="sc">+</span> Motor.Vehicle.Theft, <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(crime_ny, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Year"</span>, <span class="st">"County"</span>, <span class="st">"Agency"</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Check =</span> <span class="fu">ifelse</span>(Sum_Other_Entries <span class="sc">==</span> Property.Total, <span class="st">"Pass"</span>, <span class="st">"Fail"</span>))</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">nrow</span>(check_result[check_result<span class="sc">$</span>Check<span class="sc">!=</span><span class="st">'Pass'</span>,]), <span class="st">' rows with mismatch of Burglary + Larceny + Motor.Vehicle.Theft == Property Total Total. </span><span class="sc">\n</span><span class="st">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">nrow</span>(check_result[check_result<span class="sc">$</span>Check<span class="sc">!=</span><span class="st">'Pass'</span>,]), <span class="st">' rows with mismatch of Burglary + Larceny + Motor.Vehicle.Theft == Property Total </span><span class="sc">\n</span><span class="st">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>0  rows with mismatch of Burglary + Larceny + Motor.Vehicle.Theft == Property Total Total. </code></pre>
+<pre><code>0  rows with mismatch of Burglary + Larceny + Motor.Vehicle.Theft == Property Total </code></pre>
 </div>
 </div>
 <p>Finally, we would also like to check whether there is a mismatch between the County Total accumulation and the individual (by-agency) values. For the cases in which we have by-agency data, there is a minor mismatch between the summed data and the County total data in Nassau in 1990 and Albany between 1990 and 1997. It may be due to data from a missing agency, but we could not verify this explicitly.</p>
@@ -428,36 +438,42 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">names_to =</span> <span class="st">"Category"</span>, </span>
 <span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">values_to =</span> <span class="st">"Value"</span>)</span>
 <span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a><span class="co">#mismatch_rows_long_indextot &lt;- subset(mismatch_rows_long_indextot, County=='Albany')</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>mismatch_rows_long_indextot<span class="sc">$</span>Year <span class="ot">&lt;-</span> <span class="fu">factor</span>(mismatch_rows_long_indextot<span class="sc">$</span>Year)</span>
 <span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mismatch_rows_long_indextot, </span>
-<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">interaction</span>(Year, County))) <span class="sc">+</span></span>
-<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">y =</span> Index.Total.y, </span>
-<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>               <span class="at">fill =</span> <span class="st">"County Total values"</span>), </span>
-<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>           <span class="at">stat =</span> <span class="st">"identity"</span>, </span>
-<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>           <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
-<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">y =</span> Index.Total.x, </span>
-<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>               <span class="at">fill =</span> <span class="st">"Sum of Reported Values by Agencies"</span>), </span>
-<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>           <span class="at">stat =</span> <span class="st">"identity"</span>, </span>
-<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>           <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
-<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Difference between County total values and summed up provided values for Albany county"</span>, </span>
-<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year + County"</span>, </span>
-<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">" Number of Crimes"</span>) <span class="sc">+</span></span>
-<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"County Total values"</span> <span class="ot">=</span> <span class="st">"red"</span>, </span>
-<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"Sum of Reported Values by Agencies"</span> <span class="ot">=</span> <span class="st">"blue"</span>)) <span class="sc">+</span></span>
-<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>mismatch_rows_long_indextot_pl <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(<span class="at">data =</span> mismatch_rows_long_indextot,</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>             <span class="at">cols =</span> <span class="fu">c</span>(Index.Total.x,Index.Total.y))</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>mismatch_rows_long_indextot_pl <span class="ot">&lt;-</span> mismatch_rows_long_indextot_pl <span class="sc">%&gt;%</span></span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">name =</span> <span class="fu">ifelse</span>(name <span class="sc">==</span> <span class="st">"Index.Total.x"</span>, <span class="st">"Summed Up"</span>, name),</span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>         <span class="at">name =</span> <span class="fu">ifelse</span>(name <span class="sc">==</span> <span class="st">"Index.Total.y"</span>, <span class="st">"County Total"</span>, name))</span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>mismatch_rows_long_indextot_pl <span class="ot">&lt;-</span> <span class="fu">rename</span>(mismatch_rows_long_indextot_pl, <span class="at">Type =</span> name)</span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mismatch_rows_long_indextot_pl, </span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">interaction</span>(Year, County), </span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>               <span class="at">y =</span> value, </span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>               <span class="at">fill =</span> Type)) <span class="sc">+</span></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"dodge"</span>, </span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>           <span class="at">stat =</span> <span class="st">"identity"</span>, </span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>           <span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Difference between </span><span class="sc">\"</span><span class="st">County Total</span><span class="sc">\"</span><span class="st"> values and summed up values"</span>, </span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year + County"</span>, </span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Total Number of Crimes"</span>) <span class="sc">+</span></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"County Total"</span> <span class="ot">=</span> <span class="st">"blue"</span>, </span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"Summed Up"</span> <span class="ot">=</span> <span class="st">"lightblue"</span>)) <span class="sc">+</span></span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="data_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>In the plot above we compare the discrepancy in the total crime number for each inconsistency. We can observe that the inconsistency is very minor and will not affect our analysis below.</p>
+<p>In the plot above we compare the discrepancy in the total crime number for each inconsistency. We observe that the inconsistency is very minor and will not affect our analysis below.</p>
 </section>
 <section id="ny-state-population-dataset" class="level3" data-number="2.3.2">
 <h3 data-number="2.3.2" class="anchored" data-anchor-id="ny-state-population-dataset"><span class="header-section-number">2.3.2</span> NY State population dataset</h3>
 <p>We now focus on the <a href="https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k">population dataset</a>.</p>
-<p>We first plot the percentage of the available (i.e., non-NA) data:</p>
+<p>We first plot the percentage of the available (i.e., non-NA, non-empty, non-missing) data:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -476,7 +492,7 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, </span>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">fill =</span> <span class="st">"lightblue"</span>) <span class="sc">+</span></span>
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">sprintf</span>(<span class="st">"%.1f%%"</span>, <span class="dv">100</span> <span class="sc">-</span> MissingPercentage)),</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="fl">1.5</span>, <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span>  <span class="co"># Add percentage labels</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="fl">1.5</span>, <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Percentage of Available Data in Each Column"</span>,</span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Column"</span>,</span>
 <span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Available Percentage"</span>) <span class="sc">+</span></span>
@@ -485,66 +501,94 @@ Describe any patterns you discover in missing values. If no values are missing, 
 <div class="cell-output-display">
 <p><img src="data_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#library(redav)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#plot_missing(result, percent = T)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
-<p>It turns out that we do not have any missing values.</p>
-<p>As mentioned above, the population datasets contain population estimates for the years within/outside of census data. We want to visualize how well these estimations perform and whether there are significant discrepancies with the “actual” population numbers (we take the census numbers as the ground truth).</p>
-<p>To do so, we focus on the numbers for the whole state as a representative. Furthermore, we restrict to data after 1990, as that is the period for which we have NY State crime data:</p>
+<p>It turns out that we are dealing with a well-cured dataset without any missing values.</p>
+<p>As mentioned above, the population datasets contain population estimates for the years within/outside of census data. We want to visualize how well these estimations perform and whether there are significant discrepancies with the “actual” population numbers. Here, we take the census numbers as the ground truth, which is certainly sufficient for our purposes but may not be wise for more detailed studies.</p>
+<p>To do so, we focus on the population numbers for the whole state as a representative. Furthermore, we restrict to data after 1990, as that is the period of interest for us:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>pop_ny_full_state <span class="ot">&lt;-</span> pop_ny[(pop_ny<span class="sc">$</span>Geography <span class="sc">==</span> <span class="st">'New York State'</span>) <span class="sc">&amp;</span> (pop_ny<span class="sc">$</span>Year <span class="sc">&gt;=</span> <span class="dv">1990</span>), ]</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pop_ny_full_state, </span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">aes</span>(<span class="at">x =</span> Year, </span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">y =</span> Population, </span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">fill =</span> Program.Type)) <span class="sc">+</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>, </span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">width =</span> <span class="fl">0.9</span>) <span class="sc">+</span> </span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Population (estimate) per Year"</span>, </span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>, </span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Population"</span>) <span class="sc">+</span></span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Census Base Population"</span> <span class="ot">=</span> <span class="st">"blue"</span>, </span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"Postcensal Population Estimate"</span> <span class="ot">=</span> <span class="st">"red"</span>,</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>                              <span class="st">'Intercensal Population Estimate'</span> <span class="ot">=</span> <span class="st">'orange'</span>)) <span class="sc">+</span></span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pop_ny_full_state <span class="ot">&lt;-</span> pop_ny[(pop_ny<span class="sc">$</span>Geography <span class="sc">==</span> <span class="st">'New York State'</span>) <span class="sc">&amp;</span> (pop_ny<span class="sc">$</span>Year <span class="sc">&gt;=</span> <span class="dv">1990</span>), ]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pop_ny_full_state, </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">aes</span>(<span class="at">x =</span> Year, </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">y =</span> Population, </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">fill =</span> Program.Type)) <span class="sc">+</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>, </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">width =</span> <span class="fl">0.9</span>) <span class="sc">+</span> </span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Population (estimate) per Year"</span>, </span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>, </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Population"</span>) <span class="sc">+</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Census Base Population"</span> <span class="ot">=</span> <span class="st">"blue"</span>, </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"Postcensal Population Estimate"</span> <span class="ot">=</span> <span class="st">"red"</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>                              <span class="st">'Intercensal Population Estimate'</span> <span class="ot">=</span> <span class="st">'orange'</span>)) <span class="sc">+</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="data_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Notice that we have estimates even for the census years (1990, 2000, 2010, and 2020); Their respective bars are split into two (and of different colors). The intercensal population estimates are in line with the census data (which makes sense), while there is a small jump between the 2019 estimate and the 2020 census data. As we remarked above, this dataset was created in 2014 and kept as point-in-time. Therefore, the forecast will be postcensal for anything after 2010.</p>
-<p>The estimates will undoubtedly be good enough for our purposes. The crime/population will divide a small number by a large number. Therefore, minor errors in the population estimate will not affect any conclusions we draw in the following.</p>
+<p>The estimates will undoubtedly be good enough for our purposes. We are interested in the ratio crime/population size, and therefore will divide a relatively small number by a large number. Hence, minor errors in the population estimates will not affect any conclusions we draw in the following.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># census_years &lt;- unique(pop_ny_full_state[pop_ny_full_state$Program.Type == 'Census Base Population', ]$Year)</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># pop_ny_full_state_cens_yrs &lt;- subset(pop_ny_full_state, pop_ny_full_state$Year %in% census_years)</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># pop_ny_full_state_cens_yrs_wide &lt;- pivot_wider(pop_ny_full_state_cens_yrs, </span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#                        names_from = Program.Type, </span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#                        values_from = Population)</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># colnames(pop_ny_full_state_cens_yrs_wide)</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co"># names(pop_ny_full_state_cens_yrs_wide)</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(pop_ny_full_state_cens_yrs_wide, aes(x = Year)) +</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(y = `Census Base Population`, color = "Census Base Population"), </span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co">#              position = position_dodge(width = 0.4)) +</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(y = `Intercensal Population Estimate`, color = "Intercensal Estimate"), </span></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="co">#              position = position_dodge(width = 0.2)) +</span></span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(y = `Postcensal Population Estimate`, color = "Postcensal Estimate"), </span></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="co">#              position = position_dodge(width = -0.2)) +</span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="co">#   labs(title = "A", x = "B", y = "C") +</span></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="co">#   scale_color_manual(values = c("Census Base Population" = "blue", </span></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="co">#                                 "Intercensal Estimate" = "orange",</span></span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="co">#                                 "Postcensal Estimate" = "red"),</span></span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="co">#                      name = "Legend Title") +</span></span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_minimal() +</span></span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(axis.text.x = element_text(angle = 45, hjust = 1))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(mismatch_rows_long_indextot, </span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#        aes(x = interaction(Year, County)), </span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#            order = (Year)) +</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_bar(aes(y = Index.Total.y, </span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#                fill = "County Total values"), </span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">#            stat = "identity", </span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">#            position = "dodge",</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">#            alpha=0.5) +</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_bar(aes(y = Index.Total.x, </span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">#                fill = "Sum of Reported Values by Agencies"), </span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co">#            stat = "identity", </span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co">#            position = "dodge",</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">#             alpha=0.5) +</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   labs(title = "Difference between \"County Total\" values and summed up values", </span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#        x = "Year + County", </span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#        y = "Total Number of Crimes") +</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   scale_fill_manual(values = c("County Total values" = "red", </span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co">#                                "Sum of Reported Values by Agencies" = "blue")) +</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_minimal() +</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(axis.text.x = element_text(angle = 45, hjust = 1))</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="co"># census_years &lt;- unique(pop_ny_full_state[pop_ny_full_state$Program.Type == 'Census Base Population', ]$Year)</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="co"># pop_ny_full_state_cens_yrs &lt;- subset(pop_ny_full_state, pop_ny_full_state$Year %in% census_years)</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="co"># pop_ny_full_state_cens_yrs_wide &lt;- pivot_wider(pop_ny_full_state_cens_yrs, </span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="co">#                        names_from = Program.Type, </span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="co">#                        values_from = Population)</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a><span class="co"># colnames(pop_ny_full_state_cens_yrs_wide)</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a><span class="co"># names(pop_ny_full_state_cens_yrs_wide)</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(pop_ny_full_state_cens_yrs_wide, aes(x = Year)) +</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(y = `Census Base Population`, color = "Census Base Population"), </span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a><span class="co">#              position = position_dodge(width = 0.4)) +</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(y = `Intercensal Population Estimate`, color = "Intercensal Estimate"), </span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="co">#              position = position_dodge(width = 0.2)) +</span></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(y = `Postcensal Population Estimate`, color = "Postcensal Estimate"), </span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a><span class="co">#              position = position_dodge(width = -0.2)) +</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a><span class="co">#   labs(title = "A", x = "B", y = "C") +</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a><span class="co">#   scale_color_manual(values = c("Census Base Population" = "blue", </span></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a><span class="co">#                                 "Intercensal Estimate" = "orange",</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a><span class="co">#                                 "Postcensal Estimate" = "red"),</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a><span class="co">#                      name = "Legend Title") +</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_minimal() +</span></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(axis.text.x = element_text(angle = 45, hjust = 1))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 

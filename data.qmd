@@ -32,19 +32,19 @@ Describe any patterns you discover in missing values. If no values are missing, 
 
 The dataset on [Index Crimes by County and Agency in New York](https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq), is collected by the New York State Division of Criminal Justice Services, which obtains crime reports from more than 500 New York State police and sheriff’s departments. The data is formatted in a tabular structure, with columns specifying details like county, agency, year, region, and various crime categories. So, the dataset includes geographic information (county and agency), temporal information (year), and crime categories and contains roughly 22 thousand rows and 15 columns.
 
-The reporting system gathers data on seven Index offenses, commonly used to assess the overall volume of crime. These encompass violent crimes such as murder/non-negligent manslaughter, forcible rape, robbery, and aggravated assault, as well as property crimes like burglary, larceny, and motor vehicle theft.
+The reporting system gathers data on seven "index offenses", commonly used to assess the overall volume of crime. These encompass violent crimes such as murder/non-negligent manslaughter, forcible rape, robbery, and aggravated assault, as well as property crimes like burglary, larceny, and motor vehicle theft.
 
 The data has been collected since January 1990. The frequency of updates is on an annual basis, but the individual law enforcement agencies report their total crimes to the New York State Division of Criminal Justice Services monthly. Issues with the data include inconsistencies in reporting methods among different agencies, variations in the definition of crimes, or potential underreporting. We should be cautious about these nuances when interpreting trends or comparing regions and periods. Indeed, police agencies might need help with reporting, which could hinder accurate or comprehensive data submission. The figures reflect solely the crimes reported to the police and do not encompass the total number of crimes.
 
 We carefully check that the data is consistent, i.e., that the various accumulations performed within the dataset are correct. We find some inconsistencies in the County Total accumulation in Albany from 1990-1997 and Nassau County in 1990. We discuss this further in the analysis of the missing values.
 
-Since comparing crime numbers among the different counties only really makes sense if we normalize by population, we supplement our primary dataset, [Index Crimes by County and Agency in New York](https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq), with an official population dataset of the counties in NY state. The New York State Department of Labor curated the [population dataset](https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k), and started in 2014. It has been updated yearly since then and contains the (estimated) population of each County in NY state by year since 1970.
+Since comparing crime numbers among the different counties only really makes sense if we normalize by population, we supplement our primary dataset, [Index Crimes by County and Agency in New York](https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq), with an official population dataset of the counties in NY state. The New York State Department of Labor curated the [population dataset](https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k). It has been updated yearly since 2014 and contains the (estimated) population of each County in NY state by year since 1970.
 
-The dataset contains the [FIPS](https://en.wikipedia.org/wiki/Federal_Information_Processing_Standards) ("Federal Information Processing Standards") code of each NY state county, together with the name of the county (“Geography”), the year, and its population estimate. Finally, it includes a column, “Program Type,” detailing how the population number was estimated. The estimations are interpolations or extrapolations of the 10-year census data of NY State. Before 2010, the estimations were based on interpolations since for each year, in between the actual census data, both previous and following census numbers were known. However, after 2010, the data was kept as point-in-time, and therefore, the estimations were based solely on extrapolating the previous census numbers. It is essential to keep the data point-in-time, as changing the numbers in hindsight would lead to issues with models that use extrapolated data numbers.
+The dataset contains the [FIPS](https://en.wikipedia.org/wiki/Federal_Information_Processing_Standards) ("Federal Information Processing Standards") code of each NY state county, together with the name of the county (“Geography”), the year, and its population estimate. Finally, it includes a column, “Program Type,” detailing how the population number was estimated. The estimations are interpolations or extrapolations of the 10-year census data of NY State. Before 2010, the estimations were based on interpolations since for each year, in between the actual census data, both previous and following census numbers were known. However, after 2010, the data was kept as "point-in-time," and therefore, the estimations were based solely on extrapolating the previous census numbers. It is essential to keep the data point-in-time, as changing the numbers in hindsight would lead to issues with models that use extrapolated data numbers.
 
-The more detailed methodology of the “intercensal estimation” is detailed  [here](https://www.epa.gov/sites/default/files/2015-05/documents/aceappendixb_censusintercensalandpostcensaldata.pdf) and [here](https://www2.census.gov/programs-surveys/popest/technical-documentation/methodology/intercensal/2000-2010-intercensal-estimates-methodology.pdf). Essentially, for intercensal estimates, they combine the data from the two censuses with death, birth, migration, and immigration data to provide an estimate. In contrast, for postcensal forecasts, use the previous census data and the same external sources to provide an estimate.
+The more detailed methodology of the “intercensal estimation” is detailed  [here](https://www.epa.gov/sites/default/files/2015-05/documents/aceappendixb_censusintercensalandpostcensaldata.pdf) and [here](https://www2.census.gov/programs-surveys/popest/technical-documentation/methodology/intercensal/2000-2010-intercensal-estimates-methodology.pdf). Essentially, for intercensal estimates, they combine the data from the two censuses with death, birth, migration, and immigration data to provide an estimate. In contrast, for postcensal forecasts, they use the previous census data and the same external sources to provide an estimate.
 
-We shall briefly investigate the efficacies of these estimates and notice that the extrapolation is comparatively worse than the intercensal estimated data.
+We shall briefly investigate the efficacies of these estimates and notice that the extrapolation is comparatively worse than the intercensal estimated data, but that for our purposes the estimation errors are negligible.
 
 ## Research plan
 
@@ -52,9 +52,9 @@ To answer research questions related to crime trends and influencing factors, ou
 
 ### Temporal aspects
 
-Given the extensive span of (thorough reporting) of our primary dataset, we can conduct longitudinal studies, examine crime rates over multiple years, and identify particular trends and patterns. We can do this for all of NY State or County specific and compare trends between counties. For instance, it would be exciting to see whether vastly contrasting trends exist among the different counties.
+Given the extensive span of thorough reporting within our primary dataset, we can conduct longitudinal studies, examine crime rates over multiple years, and identify particular trends and patterns. We can do this for all of NY State or county specific and compare trends between counties. For instance, it would be exciting to see whether vastly contrasting trends exist among the different counties.
 
-Analyzing the data throughout the year enables assessing whether crime has increased, decreased, or remained stable. This could provide insights into the effectiveness of law enforcement strategies, changes in societal conditions, or potential impacts of specific events such as the COVID-19 pandemic. This could give a more nuanced understanding of the factors influencing crime dynamics.
+Analyzing the data throughout the years enables assessing whether crime has increased, decreased, or remained stable. This could provide insights into the effectiveness of law enforcement strategies, changes in societal conditions, or potential impacts of specific events such as the COVID-19 pandemic. This could give a more nuanced understanding of the factors influencing crime dynamics.
 
 ### Geographic aspects
 
@@ -64,7 +64,7 @@ Given the spatial information within the dataset, further supplementing it with 
 
 ### Crime specific aspects
 
-Finally, the dataset is categorized into specific crime types. So, we can analyze trends in each category, helping identify areas of concern and inform targeted interventions for potential hotspots in particular crimes.
+Finally, the dataset is categorized into specific crime types. This allows us to analyze trends in each category, helping identify areas of concern and inform targeted interventions for potential hotspots in particular crimes.
 
 It is crucial to acknowledge potential limitations such as data inconsistencies, reporting biases, and missing information, which may affect the robustness of conclusions drawn from the analysis.
 
@@ -87,6 +87,9 @@ library(dplyr)
 library(ggplot2)
 library(forcats)
 library(gganimate)
+library(viridis)
+library(tidyr)
+
 
 # load and clean/fix data for later use:
 
@@ -146,7 +149,7 @@ cat("Columns with NA values:", names(na_cols[na_cols>0]), "\n")
 # find NA values only in Months Reported column.
 ```
 
-The data is well-sourced and only contains NA values for the “Months Reported” column. In particular, upon further investigation, it turns out that a lot of the NA values appear in the accumulated County Total rows because as soon as an Agency does not indicate the number of months they reported, this will lead to an NA value in the accumulation.
+The data is well-sourced and only contains NA values for the “Months Reported” column. In particular, upon further investigation, it turns out that a lot of the NA values appear in the accumulated "County Total" rows because as soon as an Agency does not indicate the number of months they reported, this will lead to an NA value in the accumulation.
 
 Below, we have summarized the percentage of NA values in the Months Collected column per county.
 
@@ -160,43 +163,54 @@ na_rows_cnt$pct <- na_rows_cnt$Count/crime_ny_cnt$Count
 
 na_rows_cnt <- na_rows_cnt[order(na_rows_cnt$pct, decreasing = TRUE), ]
 
-ggplot(na_rows_cnt, aes(x = reorder(County, -pct), y = pct)) +
+ggplot(na_rows_cnt, 
+       aes(x = reorder(County, -pct), 
+           y = pct * 100)) +
   geom_bar(stat = "identity") +
   labs(title = "Percentage of Missing \"Months Collected\" Values by County",
-       x = "County", y = "Percentage") +
+       x = "County", y = "Missing Percentage") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
 
 ```
 
-We notice that the five counties with the most missing value percentages in the Months Collected column are the ones where we do not have Agency-level data, only County total data. We believe these numbers were aggregated from different datasets, which may have varying degrees of accuracy concerning their monthly collected information.
+We notice that the five counties with the most missing value percentages in the "Months Collected" column are the ones where we do not have Agency-level data, but only "County Total" data. We believe these numbers were aggregated from different datasets, which may have varying degrees of accuracy concerning their monthly collected information.
 
-While we are not specifically interested in the "months collected" column, we need to remember that if data was collected for strictly less than 12 months per year, there might be a skew in the data. Therefore, we look at the strictly less than 12 months reported within the non-NA values.
-
+While we are not specifically interested in the "months collected" column, we need to remember that if data was consistentlycollected for strictly less than 12 months per year, there might be a skew in the data. To get an estimate of how often we are dealing with data from less than 12 months (for the NA cases), we look at the respective fraction within the non-NA values.
 
 ```{r}
 
 less_12 <- crime_ny[(crime_ny$Months.Reported < 12) & !is.na(crime_ny$Months.Reported), ]
-less_12_cnt <- less_12 %>% group_by(County) %>% summarise(Count = n())
+less_12_cnt <- less_12 %>% 
+  group_by(County) %>% 
+  summarise(Count = n())
 
-no_na_crime_ny_cnt <- crime_ny[!is.na(crime_ny$Months.Reported), ] %>% group_by(County) %>% summarise(Count = n())
+no_na_crime_ny_cnt <- crime_ny[!is.na(crime_ny$Months.Reported), ] %>% 
+  group_by(County) %>% 
+  summarise(Count = n())
 merged_data <- merge(less_12_cnt, no_na_crime_ny_cnt, by = "County", all.x = TRUE)
 merged_data$pct <- merged_data$Count.x/merged_data$Count.y
 
 merged_data <- merged_data[order(merged_data$pct, decreasing = TRUE), ]
 
-ggplot(merged_data, aes(x = reorder(County, -pct), y = pct)) +
+ggplot(merged_data, 
+       aes(x = reorder(County, -pct), 
+           y = 100*pct)) +
   geom_bar(stat = "identity") +
-  labs(title = "Percentage of <12 vs =12\"Months Collected\" by County",
+  labs(title = "Percentage of <12 vs 12 \"Months Collected\" by County",
        x = "County", 
-       y = "Percentage of <12 vs =12 Months Collected") +
+       y = "Percentage of <12 vs 12 Months Collected") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
 ```
 
-We see that the data collected with less than 12 months compared against the data collected with precisely 12 months is negligible. Based on this, we believe the missing NA values are primarily due to data collection negligence rather than varying the number of months collected.
+We observe that the data collected with less than 12 months compared against the data collected with precisely 12 months is relatively negligible. Based on this, we believe the missing NA values are primarily due to data collection negligence rather than drastic variations of the number of months data was reported/collected.
 
-Apart from the missing values, we wanted to check that the data aggregation was consistent. We first checked that the columns sum to their respective total columns for each row and found that there is no inconsistency there:
 
+
+Apart from the missing values, we wanted to make sure that the data aggregation was performed consistently within the dataset. We first check that the columns sum to their respective total columns for each row and find that there is no inconsistency there:
 
 ```{r, warning = FALSE}
 # Check that other entries sum to Index.Total:
@@ -223,7 +237,7 @@ check_result <- crime_ny %>%
   summarise(Sum_Other_Entries = Burglary + Larceny + Motor.Vehicle.Theft, .groups = "drop") %>%
   left_join(crime_ny, by = c("Year", "County", "Agency")) %>%
   mutate(Check = ifelse(Sum_Other_Entries == Property.Total, "Pass", "Fail"))
-cat(nrow(check_result[check_result$Check!='Pass',]), ' rows with mismatch of Burglary + Larceny + Motor.Vehicle.Theft == Property Total Total. \n')
+cat(nrow(check_result[check_result$Check!='Pass',]), ' rows with mismatch of Burglary + Larceny + Motor.Vehicle.Theft == Property Total \n')
 
 ```
 
@@ -287,36 +301,41 @@ mismatch_rows_long_indextot_long <- tidyr::pivot_longer(mismatch_rows_long_index
                                                        names_to = "Category", 
                                                        values_to = "Value")
 
-#mismatch_rows_long_indextot <- subset(mismatch_rows_long_indextot, County=='Albany')
+mismatch_rows_long_indextot$Year <- factor(mismatch_rows_long_indextot$Year)
 
-ggplot(mismatch_rows_long_indextot, 
-       aes(x = interaction(Year, County))) +
-  geom_bar(aes(y = Index.Total.y, 
-               fill = "County Total values"), 
+
+mismatch_rows_long_indextot_pl <- pivot_longer(data = mismatch_rows_long_indextot,
+             cols = c(Index.Total.x,Index.Total.y))
+
+mismatch_rows_long_indextot_pl <- mismatch_rows_long_indextot_pl %>%
+  mutate(name = ifelse(name == "Index.Total.x", "Summed Up", name),
+         name = ifelse(name == "Index.Total.y", "County Total", name))
+mismatch_rows_long_indextot_pl <- rename(mismatch_rows_long_indextot_pl, Type = name)
+
+ggplot(mismatch_rows_long_indextot_pl, 
+       aes(x = interaction(Year, County), 
+               y = value, 
+               fill = Type)) +
+  geom_bar(position = "dodge", 
            stat = "identity", 
-           position = "dodge") +
-  geom_bar(aes(y = Index.Total.x, 
-               fill = "Sum of Reported Values by Agencies"), 
-           stat = "identity", 
-           position = "dodge") +
-  labs(title = "Difference between County total values and summed up provided values for Albany county", 
+           width = 0.7) +
+  labs(title = "Difference between \"County Total\" values and summed up values", 
        x = "Year + County", 
-       y = " Number of Crimes") +
-  scale_fill_manual(values = c("County Total values" = "red", 
-                               "Sum of Reported Values by Agencies" = "blue")) +
+       y = "Total Number of Crimes") +
+  scale_fill_manual(values = c("County Total" = "blue", 
+                               "Summed Up" = "lightblue")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
 
-In the plot above we compare the discrepancy in the total crime number for each inconsistency. We can observe that the inconsistency is very minor and will not affect our analysis below.
-
+In the plot above we compare the discrepancy in the total crime number for each inconsistency. We observe that the inconsistency is very minor and will not affect our analysis below.
 
 ### NY State population dataset
 
 We now focus on the [population dataset](https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k).
 
-We first plot the percentage of the available (i.e., non-NA) data:
+We first plot the percentage of the available (i.e., non-NA, non-empty, non-missing) data:
 
 ```{r}
 pop_ny <- read.csv('data/Annual_Population_Estimates_for_New_York_State_and_Counties__Beginning_1970.csv')
@@ -334,19 +353,23 @@ ggplot(result,
   geom_bar(stat = "identity", 
            fill = "lightblue") +
   geom_text(aes(label = sprintf("%.1f%%", 100 - MissingPercentage)),
-            vjust = 1.5, size = 5) +  # Add percentage labels
+            vjust = 1.5, size = 5) +
   labs(title = "Percentage of Available Data in Each Column",
        x = "Column",
        y = "Available Percentage") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+#library(redav)
+#
+#plot_missing(result, percent = T)
+
 ```
 
-It turns out that we do not have any missing values.
+It turns out that we are dealing with a well-cured dataset without any missing values.
 
-As mentioned above, the population datasets contain population estimates for the years within/outside of census data. We want to visualize how well these estimations perform and whether there are significant discrepancies with the "actual" population numbers (we take the census numbers as the ground truth).
+As mentioned above, the population datasets contain population estimates for the years within/outside of census data. We want to visualize how well these estimations perform and whether there are significant discrepancies with the "actual" population numbers. Here, we take the census numbers as the ground truth, which is certainly sufficient for our purposes but may not be wise for more detailed studies.
 
-To do so, we focus on the numbers for the whole state as a representative. Furthermore, we restrict to data after 1990, as that is the period for which we have NY State crime data:
+To do so, we focus on the population numbers for the whole state as a representative. Furthermore, we restrict to data after 1990, as that is the period of interest for us:
 
 ```{r}
 
@@ -371,10 +394,34 @@ ggplot(pop_ny_full_state,
 
 Notice that we have estimates even for the census years (1990, 2000, 2010, and 2020); Their respective bars are split into two (and of different colors). The intercensal population estimates are in line with the census data (which makes sense), while there is a small jump between the 2019 estimate and the 2020 census data. As we remarked above, this dataset was created in 2014 and kept as point-in-time. Therefore, the forecast will be postcensal for anything after 2010.
 
-The estimates will undoubtedly be good enough for our purposes. The crime/population will divide a small number by a large number. Therefore, minor errors in the population estimate will not affect any conclusions we draw in the following.
+The estimates will undoubtedly be good enough for our purposes. We are interested in the ratio crime/population size, and therefore will divide a relatively small number by a large number. Hence, minor errors in the population estimates will not affect any conclusions we draw in the following.
+
+
 
 
 ```{r}
+# 
+# ggplot(mismatch_rows_long_indextot, 
+#        aes(x = interaction(Year, County)), 
+#            order = (Year)) +
+#   geom_bar(aes(y = Index.Total.y, 
+#                fill = "County Total values"), 
+#            stat = "identity", 
+#            position = "dodge",
+#            alpha=0.5) +
+#   geom_bar(aes(y = Index.Total.x, 
+#                fill = "Sum of Reported Values by Agencies"), 
+#            stat = "identity", 
+#            position = "dodge",
+#             alpha=0.5) +
+#   labs(title = "Difference between \"County Total\" values and summed up values", 
+#        x = "Year + County", 
+#        y = "Total Number of Crimes") +
+#   scale_fill_manual(values = c("County Total values" = "red", 
+#                                "Sum of Reported Values by Agencies" = "blue")) +
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 #
 # 
 # census_years <- unique(pop_ny_full_state[pop_ny_full_state$Program.Type == 'Census Base Population', ]$Year)
