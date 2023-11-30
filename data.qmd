@@ -374,16 +374,17 @@ To do so, we focus on the population numbers for the whole state as a representa
 ```{r}
 
 pop_ny_full_state <- pop_ny[(pop_ny$Geography == 'New York State') & (pop_ny$Year >= 1990), ]
+pop_ny_full_state <- rename(pop_ny_full_state, Type = Program.Type)
 
 ggplot(pop_ny_full_state, 
                         aes(x = Year, 
-                            y = Population, 
-                            fill = Program.Type)) +
+                            y = Population/1000000, 
+                            fill = Type)) +
   geom_col(position = "dodge", 
            width = 0.9) + 
   labs(title = "Population (estimate) per Year", 
        x = "Year", 
-       y = "Population") +
+       y = "Population (in Millions)") +
   scale_fill_manual(values = c("Census Base Population" = "blue", 
                               "Postcensal Population Estimate" = "red",
                               'Intercensal Population Estimate' = 'orange')) +
