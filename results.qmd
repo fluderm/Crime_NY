@@ -127,6 +127,38 @@ ggplot(tot_yearly, aes(x = Year,
 
 
 ```{r}
+impact_of_covid <- crime_ny_with_fips_and_pop
+impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
+
+crime_increase <- impact_of_covid[impact_of_covid$Year > 2020, ] %>%
+  group_by(County) %>%
+  summarize(increase = last(crime_pct) - first(crime_pct)) %>%
+  filter(!is.na(increase))
+
+top_counties <- crime_increase %>% top_n(62, wt = increase)
+
+selected_data <- impact_of_covid %>%
+  filter(County %in% top_counties$County)
+
+county_order <- names(sort(tapply(selected_data$crime_pct, selected_data$County, max), decreasing = TRUE))
+selected_data$County <- factor(selected_data$County, levels = county_order)
+
+my_palette <- viridis_pal()(length(unique(selected_data$County)))
+
+ggplot(selected_data, aes(x = Year, y = crime_pct, color = County)) +
+  geom_line() +
+  scale_color_manual(values = my_palette) +
+  labs(title = "Crime/population per Year for Counties with worst increase post-covid",
+       x = "Year",
+       y = "Crime/population") +
+  theme_minimal()
+
+```
+
+
+
+
+```{r}
 
 impact_of_covid <- crime_ny_with_fips_and_pop
 impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
@@ -167,7 +199,7 @@ impact_of_covid <- impact_of_covid[impact_of_covid$Year > 2015, ]
 bottom_counties <- crime_increase %>% top_n(10, wt = -increase)
 
 selected_data <- impact_of_covid %>%
-  filter(County %in% bottom_counties$County)
+  filter((County %in% bottom_counties$County) | County %in% top_counties$County) 
 
 county_order <- names(sort(tapply(selected_data$crime_pct, selected_data$County, max), decreasing = TRUE))
 selected_data$County <- factor(selected_data$County, levels = county_order)
@@ -185,6 +217,95 @@ ggplot(selected_data, aes(x = Year, y = crime_pct, color = County)) +
 ```
 
 Draw on map where each of these counties lie and see if there is a geographical connection.
+
+
+```{r}
+library(ggplot2)
+library(gganimate)
+library(viridis)
+library(magick)
+
+impact_of_covid <- crime_ny_with_fips_and_pop
+impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
+
+crime_pct_increase <- impact_of_covid[impact_of_covid$Year >= 2020, ] %>%
+  group_by(County) %>%
+  summarize(increase = (last(crime_pct) - first(crime_pct))/first(crime_pct)) %>%
+  filter(!is.na(increase))
+
+ny_state_boundaries <- st_read("../tl_2016_36_cousub/tl_2016_36_cousub.shp")
+ny_state_boundaries <- st_transform(ny_state_boundaries, crs = 4326)
+ny_state_boundaries$COUNTYFP <- as.character(ny_state_boundaries$COUNTYFP)
+
+impact_of_covid_region <- impact_of_covid %>% select(FIPS, County)
+impact_of_covid_region <- impact_of_covid_region[!duplicated(impact_of_covid_region), ]
+impact_of_covid_region <- merge(impact_of_covid_region, crime_pct_increase, by.x = "County", by.y = "County")
+impact_of_covid_region$FIPS <- as.character(impact_of_covid_region$FIPS)
+
+crime_ny_covid_merged <- merge(ny_state_boundaries, impact_of_covid_region, by.x = "COUNTYFP", by.y = "FIPS")
+
+crime_ny_covid_sf <- st_as_sf(crime_ny_covid_merged, coords = c("Longitude", "Latitude"), crs = 4326)
+
+desired_crs <- 4326
+library(viridis)
+
+ggplot(crime_ny_covid_sf, aes(fill = increase)) +
+  geom_sf(color = "black") +
+  scale_fill_viridis_c(option = "magma", direction = -1) +
+  theme_minimal() +
+  labs(title = "pct increase 2020 -> 2022",
+       fill = "increase")
+
+```
+
+Schuyler seems to have a 90% increase since covid:
+
+```{r}
+selected_data <- impact_of_covid[impact_of_covid$County == 'Schuyler', ]
+selected_data <- selected_data[selected_data$Year > 2015, ]
+
+ggplot(selected_data, aes(x = Year, y = crime_pct, color = County)) +
+  geom_line() +
+  scale_color_manual(values = my_palette) +
+  labs(title = "Crime/population per Year for Counties with least increase post-covid",
+       x = "Year",
+       y = "Crime/population") +
+  theme_minimal()
+```
+
+
+```{r}
+impact_of_covid <- crime_ny_with_fips_and_pop
+impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
+
+crime_pct_increase <- impact_of_covid[impact_of_covid$Year >= 2020, ] %>%
+  group_by(County) %>%
+  summarize(increase = (last(crime_pct) - first(crime_pct))) %>%
+  filter(!is.na(increase))
+
+ny_state_boundaries <- st_read("../tl_2016_36_cousub/tl_2016_36_cousub.shp")
+ny_state_boundaries <- st_transform(ny_state_boundaries, crs = 4326)
+ny_state_boundaries$COUNTYFP <- as.character(ny_state_boundaries$COUNTYFP)
+
+impact_of_covid_region <- impact_of_covid %>% select(FIPS, County)
+impact_of_covid_region <- impact_of_covid_region[!duplicated(impact_of_covid_region), ]
+impact_of_covid_region <- merge(impact_of_covid_region, crime_pct_increase, by.x = "County", by.y = "County")
+impact_of_covid_region$FIPS <- as.character(impact_of_covid_region$FIPS)
+
+crime_ny_covid_merged <- merge(ny_state_boundaries, impact_of_covid_region, by.x = "COUNTYFP", by.y = "FIPS")
+
+crime_ny_covid_sf <- st_as_sf(crime_ny_covid_merged, coords = c("Longitude", "Latitude"), crs = 4326)
+
+desired_crs <- 4326
+library(viridis)
+
+ggplot(crime_ny_covid_sf, aes(fill = increase)) +
+  geom_sf(color = "black") +
+  scale_fill_viridis_c(option = "magma", direction = -1) +
+  theme_minimal() +
+  labs(title = "absolute increase 2020 -> 2022",
+       fill = "increase")
+```
 
 
 
