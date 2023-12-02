@@ -357,6 +357,122 @@ ggplot(top_5_counts, aes(x = County,
 ## Impact of stop-and-frisk on crime statistics under Bloomberg
 
 
+```{r}
+NYC <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Region == 'New York City', ]
+columns_to_plot <- c("Murder", "Rape", "Robbery", "Aggravated.Assault", "Burglary", "Larceny", "Motor.Vehicle.Theft")
+NYC_long <- tidyr::gather(NYC, key = "Variable", value = "Value", columns_to_plot)
+NYC_long_summarized <- NYC_long %>%
+  group_by(Year, Variable) %>%
+  summarise(Sum_Value = sum(Value, na.rm = TRUE),
+            Population = first(Population)) %>%
+  ungroup()
+
+# ggplot(NYC, aes(x = Year)) +
+#   geom_point(aes(y = Murder), color = "red", linetype = "solid", size = 1) +
+#   geom_point(aes(y = Rape), color = "blue", linetype = "solid", size = 1) +
+#   geom_point(aes(y = Robbery), color = "green", linetype = "solid", size = 1) +
+#   labs(title = "Time Series Plot for Individual Columns in NYC County",
+#        x = "Year",
+#        y = "Value") +
+#   theme_minimal()
+
+ggplot(NYC_long_summarized, aes(x = Year, y = Sum_Value/Population, color = Variable)) +
+  geom_line() +
+  scale_color_manual(values = my_palette) +
+  labs(title = "Crime/population per Year for Counties with least increase post-covid",
+       x = "Year",
+       y = "Crime/population") +
+  theme_minimal()
+
+```
+
+```{r}
+non_NYC <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Region != 'New York City', ]
+columns_to_plot <- c("Murder", "Rape", "Robbery", "Aggravated.Assault", "Burglary", "Larceny", "Motor.Vehicle.Theft")
+non_NYC_long <- tidyr::gather(non_NYC, key = "Variable", value = "Value", columns_to_plot)
+non_NYC_long_summarized <- non_NYC_long %>%
+  group_by(Year, Variable) %>%
+  summarise(Sum_Value = sum(Value, na.rm = TRUE),
+            Population = first(Population)) %>%
+  ungroup()
+
+# ggplot(NYC, aes(x = Year)) +
+#   geom_point(aes(y = Murder), color = "red", linetype = "solid", size = 1) +
+#   geom_point(aes(y = Rape), color = "blue", linetype = "solid", size = 1) +
+#   geom_point(aes(y = Robbery), color = "green", linetype = "solid", size = 1) +
+#   labs(title = "Time Series Plot for Individual Columns in NYC County",
+#        x = "Year",
+#        y = "Value") +
+#   theme_minimal()
+# ggplot(non_NYC_long_summarized, aes(x = Year, y = Sum_Value/Population, color = Variable)) +
+#   geom_line() +
+#   scale_color_manual(values = my_palette) +
+#   labs(title = "Crime/population per Year for Counties with least increase post-covid",
+#        x = "Year",
+#        y = "Crime/population") +
+#   theme_minimal()
+
+combined_NYC <- rbind(
+  mutate(NYC_long_summarized, Location = "NYC"),
+  mutate(non_NYC_long_summarized, Location = "Non-NYC")
+)
+
+ggplot(combined_NYC, 
+       aes(x = Year, 
+           y = Sum_Value/Population, 
+           color = Location, 
+           group = Location)) +
+  geom_line() +
+  labs(title = "NYC vs Non-NYC",
+       x = "Year",
+       y = "Crime/population") +
+  scale_color_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
+  theme_minimal() +
+  facet_wrap(~Variable, scales = "free_y")
+```
+
+```{r}
+
+combined_NYC_bloomb <- combined_NYC[(combined_NYC$Year > 1999) & (combined_NYC$Year < 2015), ]
+
+ggplot(combined_NYC_bloomb, 
+       aes(x = Year, 
+           y = Sum_Value/Population, 
+           color = Location, 
+           group = Location)) +
+  geom_line() +
+  labs(title = "NYC vs Non-NYC",
+       x = "Year",
+       y = "Crime/population") +
+  scale_color_manual(values = c("NYC" = "blue", 
+                                "Non-NYC" = "red")) +
+  theme_minimal() +
+  facet_wrap(~Variable, scales = "free_y")
+```
+
+During 2002 - 2012, NYC imposed stop-and-frisk, we compare NYC crime reports (for 7 major crime stats) vs non-NYC. If the stop and frisk had any effect, we expect NYC crime stats to decrease stronger than non-NYC. Logic: stop and frisk -> "create more safety" -> less crime overall. 
+
+There are various flaws with our analysis: Do not consider other effects, etc.
+
+To compare set starting point the same:
+
+```{r}
+combined_NYC_bloomb <- combined_NYC %>%
+  filter(Year > 1999 & Year < 2015) %>%
+  group_by(Variable, Location) %>%
+  mutate(adjusted_value = Sum_Value/Population - first(Sum_Value/Population))
+
+ggplot(combined_NYC_bloomb, aes(x = Year, y = adjusted_value, color = Location, group = Location)) +
+  geom_line() +
+  labs(title = "Adjusted Crime/population per Year for NYC vs Non-NYC",
+       x = "Year",
+       y = "Adjusted Crime/population") +
+  scale_color_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
+  theme_minimal() +
+  facet_wrap(~Variable, scales = "free_y")
+```
+
+
 <!-- 
 https://www.nyclu.org/en/stop-and-frisk-data
 -->
