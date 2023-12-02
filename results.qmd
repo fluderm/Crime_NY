@@ -364,7 +364,7 @@ NYC_long <- tidyr::gather(NYC, key = "Variable", value = "Value", columns_to_plo
 NYC_long_summarized <- NYC_long %>%
   group_by(Year, Variable) %>%
   summarise(Sum_Value = sum(Value, na.rm = TRUE),
-            Population = first(Population)) %>%
+            Population = sum(Population)) %>%
   ungroup()
 
 # ggplot(NYC, aes(x = Year)) +
@@ -390,10 +390,11 @@ ggplot(NYC_long_summarized, aes(x = Year, y = Sum_Value/Population, color = Vari
 non_NYC <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Region != 'New York City', ]
 columns_to_plot <- c("Murder", "Rape", "Robbery", "Aggravated.Assault", "Burglary", "Larceny", "Motor.Vehicle.Theft")
 non_NYC_long <- tidyr::gather(non_NYC, key = "Variable", value = "Value", columns_to_plot)
+
 non_NYC_long_summarized <- non_NYC_long %>%
   group_by(Year, Variable) %>%
   summarise(Sum_Value = sum(Value, na.rm = TRUE),
-            Population = first(Population)) %>%
+            Population = sum(Population)) %>%
   ungroup()
 
 # ggplot(NYC, aes(x = Year)) +
@@ -464,12 +465,76 @@ combined_NYC_bloomb <- combined_NYC %>%
 
 ggplot(combined_NYC_bloomb, aes(x = Year, y = adjusted_value, color = Location, group = Location)) +
   geom_line() +
-  labs(title = "Adjusted Crime/population per Year for NYC vs Non-NYC",
+  labs(title = "Adjusted NYC vs Non-NYC",
        x = "Year",
-       y = "Adjusted Crime/population") +
+       y = "Adjusted") +
   scale_color_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
   theme_minimal() +
   facet_wrap(~Variable, scales = "free_y")
+```
+
+
+```{r}
+
+combined_NYC_bloomb <- combined_NYC %>%
+  filter(Year > 1980 & Year <=2002) %>%
+  group_by(Variable, Location)
+combined_NYC_bloomb1 <- combined_NYC_bloomb %>%
+  group_by(Year, Location) %>%
+  summarise(Sum_Value = sum(Sum_Value, na.rm = TRUE),
+            Population = sum(Population)) %>%
+  ungroup()
+combined_NYC_bloomb1 <- combined_NYC_bloomb1 %>%
+  group_by(Location) %>% 
+  mutate(adjusted_value = Sum_Value/Population - first(Sum_Value/Population))
+
+combined_NYC_bloomb <- combined_NYC %>%
+  filter(Year >= 2002 & Year <=2012) %>%
+  group_by(Variable, Location)
+combined_NYC_bloomb2 <- combined_NYC_bloomb %>%
+  group_by(Year, Location) %>%
+  summarise(Sum_Value = sum(Sum_Value, na.rm = TRUE),
+            Population = sum(Population)) %>%
+  ungroup()
+combined_NYC_bloomb2 <- combined_NYC_bloomb2 %>%
+  group_by(Location) %>% 
+  mutate(adjusted_value = Sum_Value/Population - first(Sum_Value/Population))
+
+combined_NYC_bloomb <- combined_NYC %>%
+  filter(Year >= 2012 & Year <=2042) %>%
+  group_by(Variable, Location)
+combined_NYC_bloomb3 <- combined_NYC_bloomb %>%
+  group_by(Year, Location) %>%
+  summarise(Sum_Value = sum(Sum_Value, na.rm = TRUE),
+            Population = sum(Population)) %>%
+  ungroup()
+combined_NYC_bloomb3 <- combined_NYC_bloomb3 %>%
+  group_by(Location) %>% 
+  mutate(adjusted_value = Sum_Value/Population - first(Sum_Value/Population))
+
+ggplot(combined_NYC_bloomb1, aes(x = Year, y = adjusted_value, color = Location, group = Location)) +
+  geom_line() +
+  labs(title = "NYC vs Non-NYC",
+       x = "Year",
+       y = "Crime/population") +
+  scale_color_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
+  theme_minimal()
+
+ggplot(combined_NYC_bloomb2, aes(x = Year, y = adjusted_value, color = Location, group = Location)) +
+  geom_line() +
+  labs(title = "NYC vs Non-NYC",
+       x = "Year",
+       y = "Crime/population") +
+  scale_color_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
+  theme_minimal()
+
+ggplot(combined_NYC_bloomb3, aes(x = Year, y = adjusted_value, color = Location, group = Location)) +
+  geom_line() +
+  labs(title = "NYC vs Non-NYC",
+       x = "Year",
+       y = "Crime/population") +
+  scale_color_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
+  theme_minimal()
 ```
 
 
