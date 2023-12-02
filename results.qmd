@@ -538,6 +538,20 @@ ggplot(combined_NYC_bloomb3, aes(x = Year, y = adjusted_value, color = Location,
 ```
 
 
+```{r}
+
+
+ggplot(combined_NYC, aes(x=Year, y=Sum_Value, fill=Variable)) + 
+    geom_area()+
+  labs(title = "Stacked Area Plot of Crime Types",
+       x = "Year",
+       y = "Crime")+
+  theme_minimal()+
+  facet_wrap(~Location, ncol = 1)
+
+```
+
+
 <!-- 
 https://www.nyclu.org/en/stop-and-frisk-data
 -->
