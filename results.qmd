@@ -16,6 +16,8 @@ library(dplyr)
 library(ggplot2)
 library(forcats)
 library(gganimate)
+library(tidyverse)
+library(redav)
 
 crime_ny <- read.csv("data/Index_Crimes_by_County_and_Agency__Beginning_1990.csv")
 pop_ny <- read.csv('data/Annual_Population_Estimates_for_New_York_State_and_Counties__Beginning_1970.csv')
@@ -349,6 +351,53 @@ ggplot(top_5_counts, aes(x = County,
        y = "Index.Total")
 ```
 
+```{r}
+
+crime_ny_filtered_county_tot <- crime_ny_with_fips_and_pop
+
+crime_ny_filtered_county_tot <- crime_ny_filtered_county_tot %>% select(c('County', 'Year', 'Murder', 'Rape', 'Robbery', 'Aggravated.Assault', 'Burglary', 'Larceny', 'Motor.Vehicle.Theft', 'Population'))
+
+crime_ny_filtered_county_tot <- crime_ny_filtered_county_tot %>% 
+  group_by(County, Year) %>%
+  summarise_each(list(sum))
+
+crime_ny_filtered_county_tot[ , 3:9] <- 10000*crime_ny_filtered_county_tot[, 2:8]/crime_ny_filtered_county_tot$Population
+
+
+draw_biplot(crime_ny_filtered_county_tot[crime_ny_filtered_county_tot$Year == 1990 ,c(1,3:9)], project = F)
+draw_biplot(crime_ny_filtered_county_tot[crime_ny_filtered_county_tot$Year == 2000 ,c(1,3:9)], project = F)
+draw_biplot(crime_ny_filtered_county_tot[crime_ny_filtered_county_tot$Year == 2010 ,c(1,3:9)], project = F)
+draw_biplot(crime_ny_filtered_county_tot[crime_ny_filtered_county_tot$Year == 2020 ,c(1,3:9)], project = F)
+
+```
+
+```{r}
+
+crime_ny_filtered_county_tot_2020_to_22 <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Year >= 2020,]
+
+crime_ny_filtered_county_tot_2020_to_22_non_ny <- crime_ny_filtered_county_tot_2020_to_22[crime_ny_filtered_county_tot_2020_to_22$Region == 'Non-New York City', ]
+crime_ny_filtered_county_tot_2020_to_22_non_ny <- crime_ny_filtered_county_tot_2020_to_22_non_ny %>% select(c('County', 'Murder', 'Rape', 'Robbery', 'Aggravated.Assault', 'Burglary', 'Larceny', 'Motor.Vehicle.Theft', 'Population'))
+crime_ny_filtered_county_tot_2020_to_22_non_ny <- crime_ny_filtered_county_tot_2020_to_22_non_ny %>% 
+  group_by(County) %>%
+  summarise_each(list(sum))
+
+crime_ny_filtered_county_tot_2020_to_22_non_ny[ , 2:8] <- 10000*crime_ny_filtered_county_tot_2020_to_22_non_ny[, 2:8]/crime_ny_filtered_county_tot_2020_to_22_non_ny$Population
+
+draw_biplot(crime_ny_filtered_county_tot_2020_to_22_non_ny[ , 1:8], 'Rape', project = T)
+```
+
+
+```{r}
+crime_ny_filtered_county_tot_2020_to_22_ny <- crime_ny_filtered_county_tot_2020_to_22[crime_ny_filtered_county_tot_2020_to_22$Region != 'Non-New York City', ]
+crime_ny_filtered_county_tot_2020_to_22_ny <- crime_ny_filtered_county_tot_2020_to_22_ny %>% select(c('County', 'Murder', 'Rape', 'Robbery', 'Aggravated.Assault', 'Burglary', 'Larceny', 'Motor.Vehicle.Theft', 'Population'))
+crime_ny_filtered_county_tot_2020_to_22_ny <- crime_ny_filtered_county_tot_2020_to_22_ny %>% 
+  group_by(County) %>%
+  summarise_each(list(sum))
+
+crime_ny_filtered_county_tot_2020_to_22_ny[ , 2:8] <- 10000*crime_ny_filtered_county_tot_2020_to_22_ny[, 2:8]/crime_ny_filtered_county_tot_2020_to_22_ny$Population
+
+draw_biplot(crime_ny_filtered_county_tot_2020_to_22_ny[ , 1:8], 'Rape', project = T)
+```
 
 
 ## Overall crime numbers in NY State and the impact of COVID-10
