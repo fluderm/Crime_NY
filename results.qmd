@@ -1,7 +1,12 @@
 # Results
 
 
-## Overall crime numbers in NY State and the impact of COVID-10
+
+
+
+## Overall Crime Trends in NY State
+
+We start by investigating the overall trend in the total number of crimes committed since 1990 in the whole of NY State. To do so, we draw two plots, the first depicting the absolute numbers, and the second one depicting the crime numbers by population.
 
 
 ```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
@@ -18,6 +23,14 @@ library(forcats)
 library(gganimate)
 library(tidyverse)
 library(redav)
+library(RColorBrewer)
+library(ggplot2)
+library(gganimate)
+library(viridis)
+library(magick)
+library(viridis)
+library(patchwork)
+
 
 crime_ny <- read.csv("data/Index_Crimes_by_County_and_Agency__Beginning_1990.csv")
 pop_ny <- read.csv('data/Annual_Population_Estimates_for_New_York_State_and_Counties__Beginning_1970.csv')
@@ -59,12 +72,7 @@ crime_ny_with_fips_and_pop <- merge(crime_ny_with_fips,
 
 crime_ny_with_fips_and_pop <- crime_ny_with_fips_and_pop[!is.na(crime_ny_with_fips_and_pop$Index.Total), ]
 crime_ny_with_fips_and_pop <- crime_ny_with_fips_and_pop[, !(names(crime_ny_with_fips_and_pop) %in% c("Geography", "Program.Type"))]
-```
 
-
-
-
-```{r}
 crime_ny$Year <- as.numeric(crime_ny$Year)
 crime_ny_filtered <- crime_ny %>%
   mutate(Year_Period = cut(Year, 
@@ -75,98 +83,92 @@ crime_ny_filtered <- crime_ny %>%
                                     "-",
                                     floor((Year - 1985) / 5) * 5 + 1989)
          )
-
 crime_ny_filtered_county_tot <- crime_ny_filtered[crime_ny_filtered$Agency=='County Total',]
-
-tot_yearly <- crime_ny_filtered_county_tot %>%
-  group_by(Year) %>%
-  summarise(
-    Total_Index = sum(Index.Total)
-  ) %>%
-  ungroup()
-
-ggplot(tot_yearly, aes(x = Year, 
-                      y = Total_Index)) +
-  geom_bar(stat = "identity") +
-  scale_fill_viridis_c() +
-  theme_minimal() +
-  labs(title = "Total number of crimes in NY State by year",
-       x = "Year",
-       y = "Total number of recorded crimes")
 
 ```
 
-We see an interesting uptick after 2021 potentially due to COVID-19. Worth investigating more!
+
 
 
 ```{r}
-
+options(scipen=999)
 crime_ny_with_fips_and_pop$crime_pct <- crime_ny_with_fips_and_pop$Index.Total/crime_ny_with_fips_and_pop$Population
 
 tot_yearly <- crime_ny_with_fips_and_pop %>%
-  group_by(Year) %>%
-  summarise(
-    Total_crime = sum(Index.Total)
-  ) %>%
+  group_by(Year) |>
+  summarise(Total_crime = sum(Index.Total)) |>
   ungroup()
-
 tot_yearly <- merge(tot_yearly, pop_ny[pop_ny$Geography == 'New York State', ], by.x = "Year", by.y = "Year", all.x = TRUE)
+tot_yearly$pct <- 1000*tot_yearly$Total_crime/tot_yearly$Population
 
-tot_yearly$pct <- tot_yearly$Total_crime/tot_yearly$Population
+tot_yearly1 <- tot_yearly |> pivot_longer(cols = c('Total_crime', 'pct'),
+                           names_to = 'total_or_pct',
+                           values_to = 'total_pct_vals')
 
-ggplot(tot_yearly, aes(x = Year, 
-                      y = pct)) +
-  geom_bar(stat = "identity") +
+tot_yearly1$total_or_pct <- factor(tot_yearly1$total_or_pct, levels = c("Total_crime", "pct"))
+
+ggplot(tot_yearly1, aes(x = Year, y = total_pct_vals)) +
+  geom_col() +
   scale_fill_viridis_c() +
   theme_minimal() +
-  labs(title = "Crimes per population of crimes in NY State by year",
+  labs(title = "Crimes in NY State by Year",
        x = "Year",
-       y = "Recorded crimes per population")
-```
-
-
-### Increase in crimes per population per county
-
-
-```{r}
-impact_of_covid <- crime_ny_with_fips_and_pop
-impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
-
-crime_increase <- impact_of_covid[impact_of_covid$Year > 2020, ] %>%
-  group_by(County) %>%
-  summarize(increase = last(crime_pct) - first(crime_pct)) %>%
-  filter(!is.na(increase))
-
-top_counties <- crime_increase %>% top_n(62, wt = increase)
-
-selected_data <- impact_of_covid %>%
-  filter(County %in% top_counties$County)
-
-county_order <- names(sort(tapply(selected_data$crime_pct, selected_data$County, max), decreasing = TRUE))
-selected_data$County <- factor(selected_data$County, levels = county_order)
-
-my_palette <- viridis_pal()(length(unique(selected_data$County)))
-
-ggplot(selected_data, aes(x = Year, y = crime_pct, color = County)) +
-  geom_line() +
-  scale_color_manual(values = my_palette) +
-  labs(title = "Crime/population per Year for Counties with worst increase post-covid",
-       x = "Year",
-       y = "Crime/population") +
-  theme_minimal()
+       y = "Count") +
+  facet_wrap(~total_or_pct, 
+             scales = "free_y", 
+             ncol = 1,
+             labeller = as_labeller(c(pct = "Crimes (per 1000 people)", Total_crime = "Total number of crimes") ) ) +
+  ylab(NULL)
 
 ```
 
+We observe a dramatic decrease in total crime numbers, especially between 1990 and 2000 in NY State. Even adjusted by population, the crime numbers per 1000 people living in NY State at the time decreases drastically as well. The drop off is even more significant, since while the total number of crimes decreased, the population increased at the same time. The decrease in crime tapers off towards 2010 and then gets another slight boost after 2012. Finally, there is a significant increase in the total crime numbers, as well as the value adjusted by population after 2021. This is without a doubt an outlier in the overall decreasing trend of crime numbers in the prior 30 years, and, therefore, we strongly belive that it can be attested to the socioeconomic ripple effects of COVID-19.
 
+We shall investigate this now a bit more.
 
+## Effect of COVID-19 on Crime in the case of NY State
+
+We have observed that there is an interesting and significant uptick of crime after 2021, which we believe is associated with the effects of COVID-19. This is certainly worth investigating some more. Immediate questions that arise are:
+
+ - Which counties have experienced the worst increase in crime post-COVID, and can we observe geographical cluster associated with it?
+ - What types of crimes specifically have increased?
+
+### Impact of COVID-19 on Crimes per County
+
+We first investigate the uptick in crimes by NY State County. As there are 62 Counties in NY State, we first investigate the top 10 counties with the strongest (percentage) increase in crime since 2020. More precisely, we calculate the difference in the crime per population from 2022 to 2020, and select the counties with the largest increase in that number.
 
 ```{r}
+# impact_of_covid <- crime_ny_with_fips_and_pop
+# impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
+# 
+# crime_increase <- impact_of_covid[impact_of_covid$Year > 2020, ] %>%
+#   group_by(County) %>%
+#   summarize(increase = last(crime_pct) - first(crime_pct)) %>%
+#   filter(!is.na(increase))
+# 
+# top_counties <- crime_increase %>% top_n(62, wt = increase)
+# 
+# selected_data <- impact_of_covid %>%
+#   filter(County %in% top_counties$County)
+# 
+# county_order <- names(sort(tapply(selected_data$crime_pct, selected_data$County, max), decreasing = TRUE))
+# selected_data$County <- factor(selected_data$County, levels = county_order)
+# 
+# my_palette <- viridis_pal()(length(unique(selected_data$County)))
+# 
+# ggplot(selected_data, aes(x = Year, y = crime_pct, color = County)) +
+#   geom_line() +
+#   scale_color_manual(values = my_palette) +
+#   labs(title = "Crime/population per Year for Counties with worst increase post-covid",
+#        x = "Year",
+#        y = "Crime/population") +
+#   theme_minimal()
 
 impact_of_covid <- crime_ny_with_fips_and_pop
 impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
 impact_of_covid <- impact_of_covid[impact_of_covid$Year > 2015, ]
 
-crime_increase <- impact_of_covid[impact_of_covid$Year > 2020, ] %>%
+crime_increase <- impact_of_covid[impact_of_covid$Year >= 2020, ] %>%
   group_by(County) %>%
   summarize(increase = last(crime_pct) - first(crime_pct)) %>%
   filter(!is.na(increase))
@@ -179,60 +181,59 @@ selected_data <- impact_of_covid %>%
 county_order <- names(sort(tapply(selected_data$crime_pct, selected_data$County, max), decreasing = TRUE))
 selected_data$County <- factor(selected_data$County, levels = county_order)
 
-my_palette <- viridis_pal()(length(unique(selected_data$County)))
+my_palette <- brewer.pal(n = length(unique(selected_data$County)), name = "Set3")
 
-ggplot(selected_data, aes(x = Year, y = crime_pct, color = County)) +
-  geom_line() +
+ggplot(selected_data, aes(x = Year, y = 1000*crime_pct, color = County)) +
+  geom_line(size = 0.9) +
   scale_color_manual(values = my_palette) +
-  labs(title = "Crime/population per Year for Counties with worst increase post-covid",
+  labs(title = "Crime (per 1000 population) for Counties with worst increase after 2020",
        x = "Year",
-       y = "Crime/population") +
+       y = "Crime (per 1000 people)") +
   theme_minimal()
 
 ```
 
+We see that the NY City area dominates and experienced the largest increase. In the plot we provide the values since 2016, in order to contrast the uptick with the previous trend.
+
+We should be slightly careful here, and remark that these numbers are based on the estimated population sizes for each County. However, we believe that the effects of the COVID-19 pandemic also affected these estimates. For instance, the population in NY City decreased quite drastically during the pandemic and by 2022 has not recovered to its previous values, see for instance this [NY  Times article](https://www.nytimes.com/2022/06/28/nyregion/wealthy-pandemic-nyc.html). However, this would actually suggest that the crime numbers per 1000 population are actually more likely than not an underestimate, and the uptick in crime was even more drastic. For other counties, this is less clear, as it is likely that many NY City workers moved to countie neighboring NY City, and therefore these number might be an overestimate.
+
+It is interesting to contrast the counties with the largest increase from 2020 to 2022 to the ones with the least increase (or even decrease).
+
 ```{r}
-library(viridis)
-
-impact_of_covid <- crime_ny_with_fips_and_pop
-impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
-impact_of_covid <- impact_of_covid[impact_of_covid$Year > 2015, ]
-
-bottom_counties <- crime_increase %>% top_n(10, wt = -increase)
-
-selected_data <- impact_of_covid %>%
+top_counties <- crime_increase %>% top_n(5, wt = increase)
+bottom_counties <- crime_increase |> top_n(5, wt = -increase)
+selected_data <- impact_of_covid |>
   filter((County %in% bottom_counties$County) | County %in% top_counties$County) 
+county_order <- names(sort(tapply(selected_data$crime_pct, selected_data$County, max), decreasing = TRUE))
 
 county_order <- names(sort(tapply(selected_data$crime_pct, selected_data$County, max), decreasing = TRUE))
+
 selected_data$County <- factor(selected_data$County, levels = county_order)
+my_discrete_palette <- viridis_pal(option = "D")(length(unique(selected_data$County)))
 
-my_palette <- viridis_pal()(length(unique(selected_data$County)))
-
-ggplot(selected_data, aes(x = Year, y = crime_pct, color = County)) +
-  geom_line() +
-  scale_color_manual(values = my_palette) +
-  labs(title = "Crime/population per Year for Counties with least increase post-covid",
+ggplot(selected_data, aes(x = Year, y = 1000*crime_pct, color = County)) +
+  geom_line(size = 0.9) +
+  scale_color_manual(values = my_discrete_palette) +
+  labs(title = "Crime (per 1000 population) for Counties with least/worst increase after 2020",
        x = "Year",
-       y = "Crime/population") +
+       y = "Crime (per 1000 people)") +
   theme_minimal()
 
 ```
 
-Draw on map where each of these counties lie and see if there is a geographical connection.
+We can observe the smaller counties such as Fulton, Seneca and Sullivan did not seem to be affected by any increase in crime rates after covid, but rather their crime rates relatively judiciously continues the trend from pre-COVID. All these counties are far away from big population concentrations and seem to be more rural. As mentioned in the introduction, the power of this NY State dataset is that it represents very different parts and styles of living and, therefore, allows for better contrasts and potentially more interesting questions about causation.
 
+Finally, let us get a more comprehensive geographic look over the whole state by comparing the percentage increase/decrease of crimes per population since 2020. So, now, we look at the percentage increase of crime adjusted for population size from 2020 to 2022, i.e. as before, we calculate the differce between the crime/population for 2022 and and 2020, but now divide by the 2020 value, to get a percentage.
 
-```{r}
-library(ggplot2)
-library(gganimate)
-library(viridis)
-library(magick)
-
+```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
+#| fig-width: 8
+#| fig-height: 8
 impact_of_covid <- crime_ny_with_fips_and_pop
 impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
 
 crime_pct_increase <- impact_of_covid[impact_of_covid$Year >= 2020, ] %>%
   group_by(County) %>%
-  summarize(increase = (last(crime_pct) - first(crime_pct))/first(crime_pct)) %>%
+  summarize(increase = 100*(last(crime_pct) - first(crime_pct))/first(crime_pct)) %>%
   filter(!is.na(increase))
 
 ny_state_boundaries <- st_read("../tl_2016_36_cousub/tl_2016_36_cousub.shp")
@@ -245,12 +246,8 @@ impact_of_covid_region <- merge(impact_of_covid_region, crime_pct_increase, by.x
 impact_of_covid_region$FIPS <- as.character(impact_of_covid_region$FIPS)
 
 crime_ny_covid_merged <- merge(ny_state_boundaries, impact_of_covid_region, by.x = "COUNTYFP", by.y = "FIPS")
-
 crime_ny_covid_sf <- st_as_sf(crime_ny_covid_merged, coords = c("Longitude", "Latitude"), crs = 4326)
-
 desired_crs <- 4326
-library(viridis)
-library(patchwork)
 
 color_scale <- scale_fill_viridis_c(option = "magma", direction = -1)
 
@@ -258,30 +255,28 @@ first <- ggplot(crime_ny_covid_sf, aes(fill = increase)) +
   geom_sf(color = "black") +
   color_scale +
   theme_minimal() +
-  labs(title = "pct increase 2020 -> 2022",
-       fill = "increase")
+  labs(#title = "Percentage Increase in Crime/population from 2020 to 2022",
+       fill = "Increase (%)")
 
 second <- ggplot(crime_pct_increase, aes(x = reorder(County, increase), y = increase)) +
   geom_bar(stat = "identity", aes(fill = increase)) +
   color_scale +
   theme_minimal() +
-  labs(title = "Percentage Increase in Crime 2020 -> 2022",
+  labs(title = "Percentage Increase in Crime/population from 2020 to 2022",
        x = "County",
-       y = "Percentage Increase") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+       y = "Increase (%)") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8))
 
 second <- second + theme(legend.position = "none")
 
-combined_plots <-  second/first + plot_layout(widths = c(1, 3), heights = c(1,3))
+combined_plots <-  second/first + plot_layout(heights = c(1,3))
 
 combined_plots
 
-second
-first
-
 ```
 
-Schuyler seems to have a 90% increase since covid:
+ - Schuyler seems to have a 90% increase since covid:
+ - Discuss geography, specifically "outliers" outside of NYC and neighbouring areas.
 
 ```{r}
 selected_data <- impact_of_covid[impact_of_covid$County == 'Schuyler', ]
@@ -298,37 +293,45 @@ ggplot(selected_data, aes(x = Year, y = crime_pct, color = County)) +
 
 
 ```{r}
-impact_of_covid <- crime_ny_with_fips_and_pop
-impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
+# impact_of_covid <- crime_ny_with_fips_and_pop
+# impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
+# 
+# crime_pct_increase <- impact_of_covid[impact_of_covid$Year >= 2020, ] %>%
+#   group_by(County) %>%
+#   summarize(increase = (last(crime_pct) - first(crime_pct))) %>%
+#   filter(!is.na(increase))
 
-crime_pct_increase <- impact_of_covid[impact_of_covid$Year >= 2020, ] %>%
-  group_by(County) %>%
-  summarize(increase = (last(crime_pct) - first(crime_pct))) %>%
-  filter(!is.na(increase))
-
-ny_state_boundaries <- st_read("../tl_2016_36_cousub/tl_2016_36_cousub.shp")
-ny_state_boundaries <- st_transform(ny_state_boundaries, crs = 4326)
-ny_state_boundaries$COUNTYFP <- as.character(ny_state_boundaries$COUNTYFP)
-
-impact_of_covid_region <- impact_of_covid %>% select(FIPS, County)
-impact_of_covid_region <- impact_of_covid_region[!duplicated(impact_of_covid_region), ]
-impact_of_covid_region <- merge(impact_of_covid_region, crime_pct_increase, by.x = "County", by.y = "County")
-impact_of_covid_region$FIPS <- as.character(impact_of_covid_region$FIPS)
-
-crime_ny_covid_merged <- merge(ny_state_boundaries, impact_of_covid_region, by.x = "COUNTYFP", by.y = "FIPS")
-
-crime_ny_covid_sf <- st_as_sf(crime_ny_covid_merged, coords = c("Longitude", "Latitude"), crs = 4326)
-
-desired_crs <- 4326
-library(viridis)
-
-ggplot(crime_ny_covid_sf, aes(fill = increase)) +
-  geom_sf(color = "black") +
-  scale_fill_viridis_c(option = "magma", direction = -1) +
-  theme_minimal() +
-  labs(title = "absolute increase 2020 -> 2022",
-       fill = "increase")
+# 
+# ny_state_boundaries <- st_read("../tl_2016_36_cousub/tl_2016_36_cousub.shp")
+# ny_state_boundaries <- st_transform(ny_state_boundaries, crs = 4326)
+# ny_state_boundaries$COUNTYFP <- as.character(ny_state_boundaries$COUNTYFP)
+# 
+# impact_of_covid_region <- impact_of_covid %>% select(FIPS, County)
+# impact_of_covid_region <- impact_of_covid_region[!duplicated(impact_of_covid_region), ]
+# impact_of_covid_region <- merge(impact_of_covid_region, crime_pct_increase, by.x = "County", by.y = "County")
+# impact_of_covid_region$FIPS <- as.character(impact_of_covid_region$FIPS)
+# 
+# crime_ny_covid_merged <- merge(ny_state_boundaries, impact_of_covid_region, by.x = "COUNTYFP", by.y = "FIPS")
+# 
+# crime_ny_covid_sf <- st_as_sf(crime_ny_covid_merged, coords = c("Longitude", "Latitude"), crs = 4326)
+# 
+# desired_crs <- 4326
+# library(viridis)
+# 
+# ggplot(crime_ny_covid_sf, aes(fill = increase)) +
+#   geom_sf(color = "black") +
+#   scale_fill_viridis_c(option = "magma", direction = -1) +
+#   theme_minimal() +
+#   labs(title = "absolute increase 2020 -> 2022",
+#        fill = "increase")
 ```
+
+### Impact of COVID-19 on Crime Types
+
+
+
+
+
 
 
 
@@ -371,6 +374,9 @@ ggplot(top_5_counts, aes(x = County,
        x = "County",
        y = "Index.Total")
 ```
+
+## Crime types and how they are aligned with each other and the Counties
+
 
 ```{r}
 
@@ -419,9 +425,6 @@ crime_ny_filtered_county_tot_2020_to_22_ny[ , 2:8] <- 10000*crime_ny_filtered_co
 
 draw_biplot(crime_ny_filtered_county_tot_2020_to_22_ny[ , 1:8], 'Rape', project = T)
 ```
-
-
-## Overall crime numbers in NY State and the impact of COVID-10
 
 
 ## Impact of stop-and-frisk on crime statistics under Bloomberg
