@@ -329,7 +329,85 @@ ggplot(selected_data, aes(x = Year, y = crime_pct, color = County)) +
 ### Impact of COVID-19 on Crime Types
 
 
+```{r}
 
+NYC <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Region == 'New York City', ]
+columns_to_plot <- c("Murder", "Rape", "Robbery", "Aggravated.Assault", "Burglary", "Larceny", "Motor.Vehicle.Theft")
+NYC_long <- tidyr::gather(NYC, key = "Variable", value = "Value", columns_to_plot)
+NYC_long_summarized <- NYC_long %>%
+  group_by(Year, Variable) %>%
+  summarise(Sum_Value = sum(Value, na.rm = TRUE),
+            Population = sum(Population)) %>%
+  ungroup()
+
+non_NYC <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Region != 'New York City', ]
+columns_to_plot <- c("Murder", "Rape", "Robbery", "Aggravated.Assault", "Burglary", "Larceny", "Motor.Vehicle.Theft")
+non_NYC_long <- tidyr::gather(non_NYC, key = "Variable", value = "Value", columns_to_plot)
+
+non_NYC_long_summarized <- non_NYC_long %>%
+  group_by(Year, Variable) %>%
+  summarise(Sum_Value = sum(Value, na.rm = TRUE),
+            Population = sum(Population)) %>%
+  ungroup()
+
+combined_NYC <- rbind(
+  mutate(NYC_long_summarized, Location = "NYC"),
+  mutate(non_NYC_long_summarized, Location = "Non-NYC")
+)
+
+combined_NYC_past5 <- combined_NYC[combined_NYC$Year > 2018,]
+combined_NYC_past5$pct <- combined_NYC_past5$Sum_Value/combined_NYC_past5$Population
+
+ggplot(combined_NYC_past5, aes(x = Year, y = 1000*pct, fill = Variable)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Crime Types by Region",
+       x = "Year",
+       y = "Crime (per 1000 people)") +
+  theme_minimal() +
+  facet_wrap(~Location, ncol = 1) +
+  scale_fill_manual(values = viridis_pal()(7))
+```
+
+```{r}
+
+crime_types <- unique(combined_NYC_past5$Variable)
+
+filtered_data <- combined_NYC_past5 %>% 
+  filter(Year %in% c(2020, 2022))
+
+percentage_change <- filtered_data %>%
+  group_by(Location, Variable) %>%
+  summarise(PercentageChange = ((pct[Year == 2022] - pct[Year == 2020]) / pct[Year == 2020]) * 100)
+
+percentage_change <- percentage_change %>%
+  arrange(PercentageChange)
+
+ggplot(percentage_change, aes(x = reorder(Variable, PercentageChange), y = PercentageChange, fill = Location)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  labs(title = "Percentage Change in Crime Types (2020-2022)",
+       x = "Crime Type",
+       y = "Percentage Change") +
+  theme_minimal() +
+  scale_fill_manual(values = viridis_pal()(length(unique(percentage_change$Location)))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+absolute_change <- filtered_data %>%
+  group_by(Location, Variable) %>%
+  summarise(PercentageChange = (pct[Year == 2022] - pct[Year == 2020]))
+
+absolute_change <- absolute_change %>%
+  arrange(absolute_change)
+
+ggplot(absolute_change, aes(x = reorder(Variable, PercentageChange), y = 1000*PercentageChange, fill = Location)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  labs(title = "Absolute Change in Crime Types (2020-2022)",
+       x = "Crime Type",
+       y = "Percentage Change") +
+  theme_minimal() +
+  scale_fill_manual(values = viridis_pal()(length(unique(percentage_change$Location)))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
 
 
 
@@ -388,13 +466,31 @@ crime_ny_filtered_county_tot <- crime_ny_filtered_county_tot %>%
   group_by(County, Year) %>%
   summarise_each(list(sum))
 
-crime_ny_filtered_county_tot[ , 3:9] <- 10000*crime_ny_filtered_county_tot[, 2:8]/crime_ny_filtered_county_tot$Population
+crime_ny_filtered_county_tot[ , 3:9] <- 1000*crime_ny_filtered_county_tot[, 3:9]/crime_ny_filtered_county_tot$Population
 
+crime_ny_filtered_county_tot_90s <- crime_ny_filtered_county_tot %>%
+  filter(Year < 2000) %>%
+  group_by(County) %>%
+  summarise(across(everything(), sum))
+draw_biplot(crime_ny_filtered_county_tot_90s[,c(1,3:9)], project = F)
 
-draw_biplot(crime_ny_filtered_county_tot[crime_ny_filtered_county_tot$Year == 1990 ,c(1,3:9)], project = F)
-draw_biplot(crime_ny_filtered_county_tot[crime_ny_filtered_county_tot$Year == 2000 ,c(1,3:9)], project = F)
-draw_biplot(crime_ny_filtered_county_tot[crime_ny_filtered_county_tot$Year == 2010 ,c(1,3:9)], project = F)
-draw_biplot(crime_ny_filtered_county_tot[crime_ny_filtered_county_tot$Year == 2020 ,c(1,3:9)], project = F)
+crime_ny_filtered_county_tot_00s <- crime_ny_filtered_county_tot %>%
+  filter((Year >= 2000) & (Year < 2010)) %>%
+  group_by(County) %>%
+  summarise(across(everything(), sum))
+draw_biplot(crime_ny_filtered_county_tot_00s[,c(1,3:9)], project = F)
+
+crime_ny_filtered_county_tot_10s <- crime_ny_filtered_county_tot %>%
+  filter((Year >= 2010) & (Year < 2020)) %>%
+  group_by(County) %>%
+  summarise(across(everything(), sum))
+draw_biplot(crime_ny_filtered_county_tot_10s[,c(1,3:9)], project = F)
+
+crime_ny_filtered_county_tot_20s <- crime_ny_filtered_county_tot %>%
+  filter((Year >= 2020) & (Year < 2030)) %>%
+  group_by(County) %>%
+  summarise(across(everything(), sum))
+draw_biplot(crime_ny_filtered_county_tot_20s[,c(1,3:9)], project = F)
 
 ```
 
