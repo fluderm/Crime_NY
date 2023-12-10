@@ -11,3 +11,6 @@ We investigate various interesting questions from a EDAV point of view, such as:
  - Effects of specific crime-fighting statistics, focusing on the example of stop-and-frisk in NYC.
  - Correlations among NY State counties and crime types/rates and potential demographics.
 
+# SHP files
+
+The required shp files are in the data folder.

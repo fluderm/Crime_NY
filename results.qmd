@@ -236,7 +236,7 @@ crime_pct_increase <- impact_of_covid[impact_of_covid$Year >= 2020, ] %>%
   summarize(increase = 100*(last(crime_pct) - first(crime_pct))/first(crime_pct)) %>%
   filter(!is.na(increase))
 
-ny_state_boundaries <- st_read("../tl_2016_36_cousub/tl_2016_36_cousub.shp")
+ny_state_boundaries <- st_read("data/tl_2016_36_cousub/tl_2016_36_cousub.shp")
 ny_state_boundaries <- st_transform(ny_state_boundaries, crs = 4326)
 ny_state_boundaries$COUNTYFP <- as.character(ny_state_boundaries$COUNTYFP)
 

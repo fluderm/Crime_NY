@@ -26,7 +26,7 @@ crime_nyc_nona <- crime_nyc[complete.cases(crime_nyc$Longitude, crime_nyc$Latitu
 crime_nyc_nona <- subset(crime_nyc_nona, select = -JURISDICTION_CODE)
 crime_nyc_nona <- crime_nyc_nona[(crime_nyc_nona$OCCUR_DATE > as.Date('2015-01-01')), ]
 
-nyc_boundaries <- st_read('../nyc_election_districts/nyc_election_districts.shp')
+nyc_boundaries <- st_read('data/nyc_election_districts/nyc_election_districts.shp')
 crime_nyc_sf <- st_as_sf(crime_nyc_nona, coords = c("Longitude", "Latitude"), crs = 4326)
 
 ggplot() +
