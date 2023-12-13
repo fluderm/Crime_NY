@@ -1,13 +1,14 @@
 # Results
 
+In this section we delve into the various facets of our primary [dataset](https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq). We initially focus on the [overall crime trends](#overall) since 1990. This analysis reveals a notable increase in the overall crime numbers post-2020, clearly deviating from the previous pattern We hypothesize that this surge is linked to the socioeconomic ripple effects of the COVID-19 pandemic, and investigate it in some detail in the following [section](#covid). Initially, we focus on the characteristics of this uptick at a [county level](#impact-of-covid-19-on-crimes-per-county), followed by an analysis of its attributes at the level of the [type of crime](#crime-by-type). 
 
+After a careful study this anomaly, we shift our focus in the next [section](#biplot) to a more comprehensive analysis of the crime types, their interrelations and connections to NY State counties. We compare different time periods and pay special attention to the disparities between NYC and non-NYC counties.
 
+In the final [section](crime-patterns), we delve into a more detailed discussion of the crime types and their evolution over the past three decades. Particularly, in the [stop-and-frisk subsection](#stop-and-frisk), we investigate the impact of ["stop-and-frisk"](https://en.wikipedia.org/wiki/Stop-and-frisk_in_New_York_City#cite_note-NYCLU-3) -- or more appropriately ["Operation Impact"](https://www.nyc.gov/html/unccp/gprb/downloads/pdf/NYC_Safety%20and%20Security_Operation%20Impact.pdf) -- implemented in the early 2000s in NYC. This involves comparing crime rates between NYC and non-NYC counties across different time periods to get a picture over the policy's effects on the overall crime statistics.
 
+## Overall Crime Trends in NY State {#overall}
 
-## Overall Crime Trends in NY State
-
-We start by investigating the overall trend in the total number of crimes committed since 1990 in the whole of NY State. To do so, we draw two plots, the first depicting the absolute numbers, and the second one depicting the crime numbers by population.
-
+We start by investigating the overall crime trends NY State since 1990. We draw two plots, the first depicting the absolute crime numbers, while the second adjusts these numbers relative to population size. For this adjustment, we use crimes per 1,000 population, which, in our view, provides more meaningful insights, especially for counties with smaller populations. Oftentimes, crime rates are reported as crime per 100,000. To provide a baseline to our numbers, we refer to the [FBI Numbers](https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/explorer/crime/crime-trend), which recorded a US national average of total crime (both violent and property crimes) at approximately 23 per 1,000.
 
 ```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
 library(viridis)
@@ -30,6 +31,7 @@ library(viridis)
 library(magick)
 library(viridis)
 library(patchwork)
+library(plotly)
 
 
 crime_ny <- read.csv("data/Index_Crimes_by_County_and_Agency__Beginning_1990.csv")
@@ -87,9 +89,6 @@ crime_ny_filtered_county_tot <- crime_ny_filtered[crime_ny_filtered$Agency=='Cou
 
 ```
 
-
-
-
 ```{r}
 options(scipen=999)
 crime_ny_with_fips_and_pop$crime_pct <- crime_ny_with_fips_and_pop$Index.Total/crime_ny_with_fips_and_pop$Population
@@ -117,27 +116,29 @@ ggplot(tot_yearly1, aes(x = Year, y = total_pct_vals)) +
   facet_wrap(~total_or_pct, 
              scales = "free_y", 
              ncol = 1,
-             labeller = as_labeller(c(pct = "Crimes (per 1000 people)", Total_crime = "Total number of crimes") ) ) +
+             labeller = as_labeller(c(pct = "Crimes (per 1,000)", Total_crime = "Total number of crimes") ) ) +
   ylab(NULL)
 
 ```
 
-We observe a dramatic decrease in total crime numbers, especially between 1990 and 2000 in NY State. Even adjusted by population, the crime numbers per 1000 people living in NY State at the time decreases drastically as well. The drop off is even more significant, since while the total number of crimes decreased, the population increased at the same time. The decrease in crime tapers off towards 2010 and then gets another slight boost after 2012. Finally, there is a significant increase in the total crime numbers, as well as the value adjusted by population after 2021. This is without a doubt an outlier in the overall decreasing trend of crime numbers in the prior 30 years, and, therefore, we strongly belive that it can be attested to the socioeconomic ripple effects of COVID-19.
+We observe a pronounced decline in total crime figures in NY State, which is particularly notable between 1990 and 2000. This decline is evident also when adjusted for population; the crime rate per 1,000 residents in New York State shows a marked decrease. This drop is even more significant, since while the total number of crimes decreased, the population increased at the same time. 
 
-We shall investigate this now a bit more.
+The decrease in crime tapers off towards 2010 and then gets another slight boost after 2012. Finally, there is a significant increase in the total crime numbers, as well as the population-adjusted figures after 2021. This surge stands out as a significant deviation from the generally decreasing trend observed over the past 30 years. Consequently, we strongly believe that it can be attributed to the socioeconomic consequences of the COVID-19 pandemic.
 
-## Effect of COVID-19 on Crime in the case of NY State
+In the following we shall investigate this particular uptick in more details.
 
-We have observed that there is an interesting and significant uptick of crime after 2021, which we believe is associated with the effects of COVID-19. This is certainly worth investigating some more. Immediate questions that arise are:
+## Impact of COVID-19 on Crime Trends in New York State {#covid}
 
- - Which counties have experienced the worst increase in crime post-COVID, and can we observe geographical cluster associated with it?
- - What types of crimes specifically have increased?
+We have identified a substantial surge in crime post-2021, a trend that we conjecture to be linked to the effects of the COVID-19 pandemic. This is certainly worth investigating some more, and we shall address the following key questions:
 
-### Impact of COVID-19 on Crimes per County
+-   Which counties in NY State have experienced the biggest rise in crime rates following the COVID-19 outbreak, and is there a discernible geographical pattern or clustering associated with it?
+-   What specific categories of crime have shown an increase during this period?
 
-We first investigate the uptick in crimes by NY State County. As there are 62 Counties in NY State, we first investigate the top 10 counties with the strongest (percentage) increase in crime since 2020. More precisely, we calculate the difference in the crime per population from 2022 to 2020, and select the counties with the largest increase in that number.
+### Analysis of COVID-19's influence on Crime Rates Across NY State Counties {#impact-of-covid-19-on-crimes-per-county}
 
-```{r}
+We first investigate the rise in crimes across the NY State counties. Since there are 62 counties in the state, we first focus on the top 10 counties that have experienced the most significant percentage increase in crime since 2020. We calculate the change in crime rates per population from 2020 to 2022. We then select and analyze the counties that exhibit the highest increase in this metric. This approach will help us understand which areas have been most affected by the pandemic in terms of rising crime rates.
+
+```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
 # impact_of_covid <- crime_ny_with_fips_and_pop
 # impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
 # 
@@ -174,58 +175,113 @@ crime_increase <- impact_of_covid[impact_of_covid$Year >= 2020, ] %>%
   filter(!is.na(increase))
 
 top_counties <- crime_increase %>% top_n(10, wt = increase)
+top_counties_5 <- crime_increase %>% top_n(5, wt = increase)
+bottom_counties_5 <- crime_increase |> top_n(5, wt = -increase)
 
-selected_data <- impact_of_covid %>%
-  filter(County %in% top_counties$County)
+# order:
+data_2022 <- impact_of_covid[impact_of_covid$Year == 2022, ]
+max_crime_2022 <- aggregate(crime_pct ~ County, data = data_2022, max)
+sorted_counties_2022 <- max_crime_2022[order(-max_crime_2022$crime_pct), ]$County
 
-county_order <- names(sort(tapply(selected_data$crime_pct, selected_data$County, max), decreasing = TRUE))
-selected_data$County <- factor(selected_data$County, levels = county_order)
+# consistent color accross 2 graphs
+all_counties <- unique(c(top_counties$County, bottom_counties_5$County))
+combined_palette <- colorRampPalette(brewer.pal(9, "Set1"))(length(all_counties))
+names(combined_palette) <- all_counties
 
-my_palette <- brewer.pal(n = length(unique(selected_data$County)), name = "Set3")
+# top 10:
+crime_top_10 <- impact_of_covid %>% filter(County %in% top_counties$County)
+crime_top_10$County <- factor(crime_top_10$County, levels = sorted_counties_2022)
 
-ggplot(selected_data, aes(x = Year, y = 1000*crime_pct, color = County)) +
+ggplot(crime_top_10, 
+       aes(x = Year, 
+           y = 1000*crime_pct, 
+           color = County)) +
   geom_line(size = 0.9) +
-  scale_color_manual(values = my_palette) +
-  labs(title = "Crime (per 1000 population) for Counties with worst increase after 2020",
+  geom_point() + 
+  scale_color_manual(values = combined_palette) +
+  labs(title = "Crime rates (per 1,000) in select New York State Counties post-2020",
        x = "Year",
-       y = "Crime (per 1000 people)") +
+       y = "Crime (per 1,000)") +
   theme_minimal()
 
 ```
 
-We see that the NY City area dominates and experienced the largest increase. In the plot we provide the values since 2016, in order to contrast the uptick with the previous trend.
+This graph shows that the NY City area (NY, Bronx, Kings, Queens and Richmond) showed the most pronounced increase in crime rates post-2020. This suggests that the socioeconomic challenges due to the pandemic were felt more strongly in the more densly populated areas of the state. This could be due to increases in poverty levels, changes in policing or other pandemic-related factors. Among the NYC counties, Richmond's (Staten Island) rise is somewhat less steep, which could potentially be attributed to its more suburban characteristics.
 
-We should be slightly careful here, and remark that these numbers are based on the estimated population sizes for each County. However, we believe that the effects of the COVID-19 pandemic also affected these estimates. For instance, the population in NY City decreased quite drastically during the pandemic and by 2022 has not recovered to its previous values, see for instance this [NY  Times article](https://www.nytimes.com/2022/06/28/nyregion/wealthy-pandemic-nyc.html). However, this would actually suggest that the crime numbers per 1000 population are actually more likely than not an underestimate, and the uptick in crime was even more drastic. For other counties, this is less clear, as it is likely that many NY City workers moved to countie neighboring NY City, and therefore these number might be an overestimate.
+Apart from the NYC area, counties such as Albany and Schenectady also show significant upticks, which suggests a more widespread effect of the pandemic beyond just rural areas. Similarly, Cortland, Cattaraugus, and Nassau counties show a less dramatic rise, yet the increase is still evident.
 
-It is interesting to contrast the counties with the largest increase from 2020 to 2022 to the ones with the least increase (or even decrease).
+We should be slightly careful with the crime rates here, since these numbers are calculated based on the estimated population figures for each county. The effects of the COVID-19 pandemic certainly affected these estimates. Particularly the numbers for New York City could be skewed, as the population notably declined during the pandemic; see for instance this [NY Times article](https://www.nytimes.com/2022/06/28/nyregion/wealthy-pandemic-nyc.html), which estimates that even by 2022, the population has not rebounded to pre-pandemic levels. This would actually suggest that the crime rate per 1,000 residents may be higher than calculated in the above graph, implying an even more significant uptick when adjusted for the reduced population.
+
+In other counties, this is less clear. For example, the migration of NYC workers may have actually increased the population in neighboring counties, and therefore these crime rates could in fact be an overestimate.
+
+It is interesting to contrast the counties with the largest increase from 2020 to 2022 to the ones with the smalles increase (or even decrease).
 
 ```{r}
-top_counties <- crime_increase %>% top_n(5, wt = increase)
-bottom_counties <- crime_increase |> top_n(5, wt = -increase)
-selected_data <- impact_of_covid |>
-  filter((County %in% bottom_counties$County) | County %in% top_counties$County) 
-county_order <- names(sort(tapply(selected_data$crime_pct, selected_data$County, max), decreasing = TRUE))
 
-county_order <- names(sort(tapply(selected_data$crime_pct, selected_data$County, max), decreasing = TRUE))
+# top 5 and bottom 5:
+crime_top_bot_5 <- impact_of_covid |>
+  filter((County %in% bottom_counties_5$County) | County %in% top_counties_5$County)
+crime_top_bot_5$County <- factor(crime_top_bot_5$County, levels = sorted_counties_2022)
 
-selected_data$County <- factor(selected_data$County, levels = county_order)
-my_discrete_palette <- viridis_pal(option = "D")(length(unique(selected_data$County)))
-
-ggplot(selected_data, aes(x = Year, y = 1000*crime_pct, color = County)) +
+ggplot(crime_top_bot_5, 
+       aes(x = Year, 
+           y = 1000*crime_pct, 
+           color = County)) +
   geom_line(size = 0.9) +
-  scale_color_manual(values = my_discrete_palette) +
-  labs(title = "Crime (per 1000 population) for Counties with least/worst increase after 2020",
+  geom_point() + 
+  scale_color_manual(values = combined_palette) +
+  labs(title = "Crime (per 1000 population) for Counties with least/most increase after 2020",
        x = "Year",
        y = "Crime (per 1000 people)") +
   theme_minimal()
 
 ```
 
-We can observe the smaller counties such as Fulton, Seneca and Sullivan did not seem to be affected by any increase in crime rates after covid, but rather their crime rates relatively judiciously continues the trend from pre-COVID. All these counties are far away from big population concentrations and seem to be more rural. As mentioned in the introduction, the power of this NY State dataset is that it represents very different parts and styles of living and, therefore, allows for better contrasts and potentially more interesting questions about causation.
+From this plot, we observe that the smaller counties, such as Fulton, Schoharie, and Hamilton, were unaffected by any increase in crime rates after 2020. Still, their crime rates relatively judiciously continued the trend from pre-COVID. Hamilton is the smallest county in NY State by population (around 5,000 residents), while Schoharie and Fulton are slightly larger at about 30,000 and 50,000, respectively. Additionally, these counties are far from significant population concentrations and seem more rural. This could suggest that the pandemic's impact on crime was less severe in these areas or that other factors helped to mitigate a rise in crime rates. As mentioned in the introduction, the power of this NY State dataset is that it represents very different demographics and living styles, allowing for better contrasts and potentially more exciting questions about causation.
 
-Finally, let us get a more comprehensive geographic look over the whole state by comparing the percentage increase/decrease of crimes per population since 2020. So, now, we look at the percentage increase of crime adjusted for population size from 2020 to 2022, i.e. as before, we calculate the differce between the crime/population for 2022 and and 2020, but now divide by the 2020 value, to get a percentage.
+Overall, the graph suggests that the pandemic's impact on crime has been uneven across NY State, with more densly populated counties experiencing a more notable increase in crime rates per 1,000 people compared to less populated ones. It is important to note that population changes, such as the exodus from urban centers like New York City during the pandemic, could further affect these rates. To support this assertion, we draw a scatter plot of population against crime rates to see if we can see a positive correlation.
 
-```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
+```{r}
+crime_inc <- impact_of_covid %>%
+  filter(Year >= 2020) %>%
+  group_by(County) %>%
+  summarize(increase = (last(crime_pct) - first(crime_pct)), .groups = 'drop')
+
+covid_2020 <- impact_of_covid %>%
+  filter(Year == 2020)
+
+# merge by county
+combined_data <- left_join(covid_2020, 
+                           crime_inc, by = "County")
+
+p <- ggplot(combined_data, aes(x = Population, #Population^(1/2), 
+                               y = 1000*increase, 
+                               text = County)) +
+  geom_point() +
+  labs(title = "Change in crime rates from 2020 to 2022 vs population",
+       x = "Population (in Millions)",
+       y = "Crime rate (per 1,000) change") +
+  theme_minimal()
+
+p_interactive <- ggplotly(p)
+p_interactive %>%
+  layout(
+    xaxis = list(
+    tickmode = "auto",
+    nticks = 20),
+    yaxis = list(
+    tickmode = "auto",
+    nticks = 20)
+  )
+
+```
+
+
+We indeed observe a relatively clear positive correlation between county population size against the change in crime rates between 2020 and 2022. As a matter of fact, a bit more massaging of the data shows that a very good interpolating function would be something like the square root of the population.
+
+Finally, let us get a more comprehensive geographic look over the whole state by comparing the **percentage** increase/decrease of crimes per population since 2020. Recall, in the above graphs, we were interested in the absolute change of the crime rates between 2020 and 2022. Now, we look at the percentage change of crime rates adjusted for population from 2020 to 2022, i.e. as before, we calculate the difference between the crime per population size for 2022 and and 2020, but now we divide by the 2020 value to get a percentage.
+
+```{r,  message=FALSE, warning=FALSE}
 #| fig-width: 8
 #| fig-height: 8
 impact_of_covid <- crime_ny_with_fips_and_pop
@@ -249,18 +305,34 @@ crime_ny_covid_merged <- merge(ny_state_boundaries, impact_of_covid_region, by.x
 crime_ny_covid_sf <- st_as_sf(crime_ny_covid_merged, coords = c("Longitude", "Latitude"), crs = 4326)
 desired_crs <- 4326
 
-color_scale <- scale_fill_viridis_c(option = "magma", direction = -1)
+# diverging color scheme
+color_scale <- scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdYlBu"))
+
+low_limit <- -40#min(crime_ny_covid_sf$increase)
+high_limit <- 100#max(crime_ny_covid_sf$increase)
+mid_point <- 0.0
+
+color_sc <- scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = mid_point, 
+                       limits = c(low_limit, high_limit),
+                       breaks = seq(low_limit, high_limit, by = 20))
 
 first <- ggplot(crime_ny_covid_sf, aes(fill = increase)) +
-  geom_sf(color = "black") +
+  geom_sf(color = "black", size = 0.1) +
   color_scale +
   theme_minimal() +
   labs(#title = "Percentage Increase in Crime/population from 2020 to 2022",
-       fill = "Increase (%)")
-
-second <- ggplot(crime_pct_increase, aes(x = reorder(County, increase), y = increase)) +
-  geom_bar(stat = "identity", aes(fill = increase)) +
-  color_scale +
+       fill = "Increase (%)") + 
+  color_sc
+  
+second <- ggplot(crime_pct_increase, 
+                 aes(x = reorder(County, increase), 
+                     y = increase)) +
+  geom_bar(stat = "identity", 
+           aes(fill = increase),
+           color = 'black', 
+           size = 0.1) +
+  color_sc +
   theme_minimal() +
   labs(title = "Percentage Increase in Crime/population from 2020 to 2022",
        x = "County",
@@ -275,62 +347,60 @@ combined_plots
 
 ```
 
- - Schuyler seems to have a 90% increase since covid:
- - Discuss geography, specifically "outliers" outside of NYC and neighbouring areas.
+Firstly, it is clear that a majority of counties have seen an upswing in crime rates from 2020 to 2022, which supports the hypothesis that COVID-19's socioeconomic effects have broadly impacted crime rates across the New York State region.
+
+Schuyler County stands out with an approximately 90% surge in crime. Looking at the data more closely, we observe that Schuyler traditionally maintained relatively low crime rates, averaging 2-3 incidents per 1,000 population before 2020. This rate nearly doubled by 2022. The jump from 2020 to 2021 is especially significant, indicating a drastic move from its historical crime trends. This increase suggests that even areas with traditionally low crime levels were not immune to the pandemic's impacts.
 
 ```{r}
-selected_data <- impact_of_covid[impact_of_covid$County == 'Schuyler', ]
-selected_data <- selected_data[selected_data$Year > 2015, ]
 
-ggplot(selected_data, aes(x = Year, y = crime_pct, color = County)) +
-  geom_line() +
-  scale_color_manual(values = my_palette) +
-  labs(title = "Crime/population per Year for Counties with least increase post-covid",
+Schuyler_dat <- impact_of_covid[impact_of_covid$County == 'Schuyler', ]
+Schuyler_dat <- Schuyler_dat[Schuyler_dat$Year > 2014, ]
+
+crime_types_long <- Schuyler_dat %>%
+  pivot_longer(cols = c(Murder, Rape, Robbery, Aggravated.Assault, 
+                        Burglary, Larceny, Motor.Vehicle.Theft),
+               names_to = "Crime_Type", 
+               values_to = "Incidents")
+
+# sort:
+sums_by_category <- crime_types_long %>%
+  filter(Year == 2022) %>%
+  group_by(Crime_Type) %>%
+  summarize(Total = sum(Incidents)) %>%
+  arrange(-Total)
+crime_types_long$Crime_Type <- factor(crime_types_long$Crime_Type, 
+                                      levels = sums_by_category$Crime_Type)
+
+ggplot(crime_types_long, aes(x = Year, 
+                             y = Incidents, 
+                             fill = Crime_Type)) +
+  geom_area(position = 'stack') +
+  scale_fill_brewer(palette = "Set1") +
+  labs(title = "Crime types in Schuyler over years",
        x = "Year",
-       y = "Crime/population") +
-  theme_minimal()
+       y = "Number of Incidents",
+       fill = "Crime Type") +
+  theme_minimal() +
+  scale_x_continuous(breaks = seq(min(crime_types_long$Year), max(crime_types_long$Year), by = 1))
+
 ```
 
 
-```{r}
-# impact_of_covid <- crime_ny_with_fips_and_pop
-# impact_of_covid$crime_pct <- impact_of_covid$Index.Total/impact_of_covid$Population
-# 
-# crime_pct_increase <- impact_of_covid[impact_of_covid$Year >= 2020, ] %>%
-#   group_by(County) %>%
-#   summarize(increase = (last(crime_pct) - first(crime_pct))) %>%
-#   filter(!is.na(increase))
+Interestingly, there has been a sharp decline in crime rates prior to 2017 in Schuyler County, and similarly drastic spikes to the one from 2021 to 2022 have occurred before. We believe that this volatility is partly due to Schuyler's relatively small population; it is the second smallest county (after Hamilton) in NY State by population. Consequently, even small numerical increases in crime can translate into relatively large percentage changes. Specifically, we have seen especially significant upticks in larceny and burglary incidents in Schuyler over the past two years.
 
-# 
-# ny_state_boundaries <- st_read("../tl_2016_36_cousub/tl_2016_36_cousub.shp")
-# ny_state_boundaries <- st_transform(ny_state_boundaries, crs = 4326)
-# ny_state_boundaries$COUNTYFP <- as.character(ny_state_boundaries$COUNTYFP)
-# 
-# impact_of_covid_region <- impact_of_covid %>% select(FIPS, County)
-# impact_of_covid_region <- impact_of_covid_region[!duplicated(impact_of_covid_region), ]
-# impact_of_covid_region <- merge(impact_of_covid_region, crime_pct_increase, by.x = "County", by.y = "County")
-# impact_of_covid_region$FIPS <- as.character(impact_of_covid_region$FIPS)
-# 
-# crime_ny_covid_merged <- merge(ny_state_boundaries, impact_of_covid_region, by.x = "COUNTYFP", by.y = "FIPS")
-# 
-# crime_ny_covid_sf <- st_as_sf(crime_ny_covid_merged, coords = c("Longitude", "Latitude"), crs = 4326)
-# 
-# desired_crs <- 4326
-# library(viridis)
-# 
-# ggplot(crime_ny_covid_sf, aes(fill = increase)) +
-#   geom_sf(color = "black") +
-#   scale_fill_viridis_c(option = "magma", direction = -1) +
-#   theme_minimal() +
-#   labs(title = "absolute increase 2020 -> 2022",
-#        fill = "increase")
-```
+Similar to Schuyler county, Cattaraugus county is an outlier; namely, it is a relatively rural area having experienced an unexpectedly large percentage increase in crime rates. Its small population size means that, similar to Schuyler, minor changes in crime figures can result in disproportionately high percentage changes. We remark that specifically the Larceny numbers in Cattaraugus increased by a lot, which is again in line with the analysis of Schuyler.
 
-### Impact of COVID-19 on Crime Types
+Let us now delve a little deeper into the regional aspects of the crime percentage change First, we notice that, unsurprisingly, there is a cluster with a steep crime increase in and around NY City (Kings, Queens, Bronx, New York and Richmond). This upswing also extends to some parts of Long Island, notably Nassau County, and to a lesser extent, Suffolk County. The pattern towards the east and Long Island is somewhat matched towards the north of NY City, where especially Putnam County saw a marked increase in crime. Similarly, this trend is matched towards the north of NY City, where Putnam County, in particular, has seen a steep increase in crime.
 
+More interestingly, there is another cluster showing a more-than-average rise in total crime around Saratoga, especially in Albany and Warren. Remarkably, neighboring to the east, there is a notable cluster where crime has decreased, including Fulton, Hamilton, Montgomery, and Schoharie counties. The underlying reason for this regional contrast in crime trends are not immediately clear to us, and would require a closer look at local factors to understand the dynamics at play.
 
-```{r}
+### Examining the Effect of COVID-19 on Crime Categories
 
+We now turn our attention to the categories of crime most affected by the effects of the COVID-19 pandemic. Given the clear contrast in crime trends between NYC and non-NYC counties discussed [earlier](#impact-of-covid-19-on-crimes-per-county), the following analysis will distinguish between these two groups. We start by examining a stacked area plot illustrating the distribution of the crime types over the past 20 years. We choose this relatively long time-period in order to understand the changes in crime categories prior to the COVID-19 pandemic.
+
+```{r, message=FALSE, warning=FALSE}
+
+# NYC Data:
 NYC <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Region == 'New York City', ]
 columns_to_plot <- c("Murder", "Rape", "Robbery", "Aggravated.Assault", "Burglary", "Larceny", "Motor.Vehicle.Theft")
 NYC_long <- tidyr::gather(NYC, key = "Variable", value = "Value", columns_to_plot)
@@ -340,224 +410,199 @@ NYC_long_summarized <- NYC_long %>%
             Population = sum(Population)) %>%
   ungroup()
 
+# non-NYC Data:
 non_NYC <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Region != 'New York City', ]
 columns_to_plot <- c("Murder", "Rape", "Robbery", "Aggravated.Assault", "Burglary", "Larceny", "Motor.Vehicle.Theft")
 non_NYC_long <- tidyr::gather(non_NYC, key = "Variable", value = "Value", columns_to_plot)
-
 non_NYC_long_summarized <- non_NYC_long %>%
   group_by(Year, Variable) %>%
   summarise(Sum_Value = sum(Value, na.rm = TRUE),
             Population = sum(Population)) %>%
   ungroup()
 
+# combine the two
 combined_NYC <- rbind(
   mutate(NYC_long_summarized, Location = "NYC"),
   mutate(non_NYC_long_summarized, Location = "Non-NYC")
 )
 
-combined_NYC_past5 <- combined_NYC[combined_NYC$Year > 2018,]
+# focus on past 5 years
+combined_NYC_past5 <- combined_NYC[combined_NYC$Year >= 2000,]
 combined_NYC_past5$pct <- combined_NYC_past5$Sum_Value/combined_NYC_past5$Population
 
-ggplot(combined_NYC_past5, aes(x = Year, y = 1000*pct, fill = Variable)) +
-  geom_bar(stat = "identity") +
-  labs(title = "Crime Types by Region",
+# make sure we sort:
+cumulative_sums <- combined_NYC_past5 %>%
+  group_by(Year, Variable) %>%
+  summarize(Total = sum(1000 * pct, na.rm = TRUE)) %>%
+  ungroup() %>%
+  arrange(Year, -Total)
+
+# change factor levels according to above sorted criterium
+combined_NYC_past5$Variable <- factor(combined_NYC_past5$Variable, 
+                                      levels = unique(cumulative_sums$Variable))
+
+# plot
+ggplot(combined_NYC_past5, aes(x = Year, 
+                               y = 1000 * pct, 
+                               fill = Variable)) +
+#  geom_bar(stat = "identity", 
+#           position = "stack") +
+  geom_area(position = 'stack') +
+  labs(title = "Crime Types by Region since 2019",
        x = "Year",
        y = "Crime (per 1000 people)") +
   theme_minimal() +
-  facet_wrap(~Location, ncol = 1) +
-  scale_fill_manual(values = viridis_pal()(7))
+  facet_wrap(~Location, 
+             ncol = 1) +
+  scale_fill_brewer(palette = "Set1")
 ```
 
-```{r}
+Analyzing the graph, we see distinct trends in crime categories for New York City and the rest of the state. First, in NYC, there has been a considerable reduction in motor vehicle thefts and burglaries. The former is certainly partially related to advancement in security systems for cars. What is also striking is that aggravated assault incidents remained relatively constant throughout the two decades both in NYC and the rest of the state. Actually, NY City has experienced a noticeable rise in such incidents. Finally, in non-NYC counties, Larceny incidents steadily declined up until 2020, while for NYC counties, it remained relatively constant up until 2020.
+
+With this in mind, we will now delve deeper into the specific crime types that have witnessed the largest increases in the past couple of years (absolutely and in percentage).
+
+```{r, message=FALSE, warning=FALSE}
 
 crime_types <- unique(combined_NYC_past5$Variable)
-
 filtered_data <- combined_NYC_past5 %>% 
   filter(Year %in% c(2020, 2022))
 
+# pct change
 percentage_change <- filtered_data %>%
   group_by(Location, Variable) %>%
   summarise(PercentageChange = ((pct[Year == 2022] - pct[Year == 2020]) / pct[Year == 2020]) * 100)
-
 percentage_change <- percentage_change %>%
   arrange(PercentageChange)
 
-ggplot(percentage_change, aes(x = reorder(Variable, PercentageChange), y = PercentageChange, fill = Location)) +
-  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
-  labs(title = "Percentage Change in Crime Types (2020-2022)",
-       x = "Crime Type",
-       y = "Percentage Change") +
-  theme_minimal() +
-  scale_fill_manual(values = viridis_pal()(length(unique(percentage_change$Location)))) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
+# absolute change
 absolute_change <- filtered_data %>%
   group_by(Location, Variable) %>%
-  summarise(PercentageChange = (pct[Year == 2022] - pct[Year == 2020]))
-
+  summarise(AbsoluteChange = (pct[Year == 2022] - pct[Year == 2020]))
 absolute_change <- absolute_change %>%
   arrange(absolute_change)
 
-ggplot(absolute_change, aes(x = reorder(Variable, PercentageChange), y = 1000*PercentageChange, fill = Location)) +
-  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
-  labs(title = "Absolute Change in Crime Types (2020-2022)",
+# combine:
+changes <- bind_rows(
+  percentage_change %>% mutate(ChangeType = "Percentage Change", ChangeValue = PercentageChange),
+  absolute_change %>% mutate(ChangeType = "Absolute Change", ChangeValue = 1000 * AbsoluteChange)
+)
+
+# pct change on top:
+changes$ChangeType <- factor(changes$ChangeType, 
+                             levels = c("Percentage Change", "Absolute Change"))
+
+# plot
+ggplot(changes, 
+       aes(x = reorder(Variable, -ChangeValue), 
+           y = ChangeValue, 
+           fill = Location)) +
+  geom_bar(stat = "identity", 
+           position = "dodge", 
+           width = 0.7) +
+  facet_wrap(~ChangeType, 
+             scales = "free_y", 
+             ncol = 1) +
+  labs(title = "Change in Crime Types (2020-2022)",
        x = "Crime Type",
-       y = "Percentage Change") +
+       y = "Change") +
   theme_minimal() +
-  scale_fill_manual(values = viridis_pal()(length(unique(percentage_change$Location)))) +
+  scale_fill_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
 
+We first notice that surprisingly motor vehicle thefts have increased the most percentage-wise. While their actual numbers remain comparatively small, they observed a jump of almost 60% in NYC. Larceny, robbery and aggravated assaults are somewhat expected to have increased significantly due to the socioeconomic effects and overall increases in poverty due to the COVID-19 pandemic. The changes -- as noted in the previous section -- are especially significant in NYC. Furthermore, the increase of about 20% in the amount of rape incidents in NYC is also quite surprising. We shall discuss the evolution of the rape incidents a bit more further [below](#Rape), as it shows some unexpected patterns. Finally, we notice that the number of murders in all of NY State has decreased.
+
+It is important to keep in mind that the baseline from which these percentages were calculated are important; a small increase from a low starting point can lead to a high percentage change.
+
+This concludes our discussion of the interesting uptick observed in the first [section](#overall) in crime rates after 2020. We mainly refrained from making conclusions on causation of various features. The effects of the pandemic on the population, ranging from economic to mental and social repercussions is inherently complicated. From our treatment, it is clear that a "shift" happened in 2020 which significantly affected the crime rates. It especially seemed to have affected rural areas (especially NYC) and apart from the murder rates (and burglaries outsides of NYC) all crime categories seemed to have been affected.
+
+## Exploring Relationships Between Crime Categories and Counties {#biplot}
 
 
 
+We now turn towards examining the relationships among different types of crimes and discerning if there are any geographic or socioeconomic patterns among counties. We use the tool of biplots, which involves reducing the data from the seven crime categories — murder, rape, robbery, aggravated assault, burglary, larceny, and motor vehicle theft — down to two dimensions using Principal Component Analysis. By doing so, we can map the counties onto a two-dimensional plane, where the proximity and positioning may reveal interesting underlying associations between the crime types and the counties' characteristics.
 
-## Crime rates (per population size) per counties for 5 year periods
+We start by drawing a biplot for the full three decades of data that our dataset contains.
 
-
-```{r}
-combined_data <- crime_ny_filtered_county_tot %>%
-  group_by(Year_Period_Label, County) %>%
-  summarise(
-    Total_Index = sum(Index.Total),
-  ) %>%
-  ungroup()
-
-top_5_counts <- combined_data %>%
-  group_by(Year_Period_Label) %>%
-  top_n(5, wt = Total_Index) %>%
-  ungroup()
-
-top_5_counts$County <- fct_reorder(top_5_counts$County, 
-                                   top_5_counts$Total_Index, 
-                                   .desc = TRUE)
-
-top_5_counts <- top_5_counts %>%
-  group_by(Year_Period_Label) %>%
-  mutate(Rank = -rank(Total_Index))
-
-top_5_counts$County <- fct_reorder(top_5_counts$County, top_5_counts$Rank)
-
-
-ggplot(top_5_counts, aes(x = County, 
-                         y = Total_Index)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~Year_Period_Label, 
-             scales = "free_x", #"free_x",
-             nrow = 5) +
-  scale_fill_viridis_c() +
-  theme_minimal() +
-  labs(title = "Index.Total by County",
-       x = "County",
-       y = "Index.Total")
-```
-
-## Crime types and how they are aligned with each other and the Counties
-
-
-```{r}
+```{r, message=FALSE, warning=FALSE}
 
 crime_ny_filtered_county_tot <- crime_ny_with_fips_and_pop
-
-crime_ny_filtered_county_tot <- crime_ny_filtered_county_tot %>% select(c('County', 'Year', 'Murder', 'Rape', 'Robbery', 'Aggravated.Assault', 'Burglary', 'Larceny', 'Motor.Vehicle.Theft', 'Population'))
-
 crime_ny_filtered_county_tot <- crime_ny_filtered_county_tot %>% 
-  group_by(County, Year) %>%
-  summarise_each(list(sum))
+  select(c('County', 'Year', 'Murder', 'Rape', 'Robbery', 
+           'Aggravated.Assault', 'Burglary', 'Larceny', 
+           'Motor.Vehicle.Theft', 'Population'))
 
 crime_ny_filtered_county_tot[ , 3:9] <- 1000*crime_ny_filtered_county_tot[, 3:9]/crime_ny_filtered_county_tot$Population
 
-crime_ny_filtered_county_tot_90s <- crime_ny_filtered_county_tot %>%
-  filter(Year < 2000) %>%
+crime_ny_filtered_county_tot_since_1990 <- crime_ny_filtered_county_tot %>%
+  filter(Year < 2030) %>%
   group_by(County) %>%
   summarise(across(everything(), sum))
-draw_biplot(crime_ny_filtered_county_tot_90s[,c(1,3:9)], project = F)
 
-crime_ny_filtered_county_tot_00s <- crime_ny_filtered_county_tot %>%
-  filter((Year >= 2000) & (Year < 2010)) %>%
-  group_by(County) %>%
-  summarise(across(everything(), sum))
-draw_biplot(crime_ny_filtered_county_tot_00s[,c(1,3:9)], project = F)
-
-crime_ny_filtered_county_tot_10s <- crime_ny_filtered_county_tot %>%
-  filter((Year >= 2010) & (Year < 2020)) %>%
-  group_by(County) %>%
-  summarise(across(everything(), sum))
-draw_biplot(crime_ny_filtered_county_tot_10s[,c(1,3:9)], project = F)
-
-crime_ny_filtered_county_tot_20s <- crime_ny_filtered_county_tot %>%
-  filter((Year >= 2020) & (Year < 2030)) %>%
-  group_by(County) %>%
-  summarise(across(everything(), sum))
-draw_biplot(crime_ny_filtered_county_tot_20s[,c(1,3:9)], project = F)
-
+draw_biplot(crime_ny_filtered_county_tot_since_1990[,c(1,3:9)], 
+            project = F,
+            point_labels = T, 
+            point_size = .4) +
+  labs(title = 'Biplot of crime rate (per 1000 population) from 1990 to 2022') +
+  theme_minimal()
 ```
 
+This graph reveals that the crime types of aggravated assault, murder, robbery and motor vehicle theft seem to be correlated, i.e. if one occurs especially comparatively often in a county so does the other. Similarly, burglary and larceny seem to be strongly related. Finally, rape is somewhat on its own and interestingly quite orthogonal to aggravated assaults and murders. Of course, we only capture around 80% of the variation in this plot, so this only paints a broad picture.
+
+With respect to regions, it looks like four of the five NYC Boroughs (NY, Bronx, Kings and Queens) show similar crime patterns, which are especially distinct from the remaining counties. They seem especially aligned with high numbers in the aggravated assaults, murders, robberies and motor vehicle thefts. Notice that due to the large number of these crimes in the 90s in and around NYC, most of the other counties are clustered towards their negative directions (due to standardization), and therefore, the more interesting direction is actually along the burglary, larceny and rape axes.
+
+Interestingly, the surrounding areas of NYC including Richmond, Nassau, Westchester and Suffolk also seem to form a regional cluster characterized by comparatively low numbers in burglary, larceny and rapes. Recall that we have seen these counties behave similar to each other in the [COVID-19 analysis](#impact-of-covid-19-on-crimes-per-county).
+
+Let us now redo the analysis for the more recent years, to see whether some of the patterns change.
+
 ```{r}
-
-crime_ny_filtered_county_tot_2020_to_22 <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Year >= 2020,]
-
-crime_ny_filtered_county_tot_2020_to_22_non_ny <- crime_ny_filtered_county_tot_2020_to_22[crime_ny_filtered_county_tot_2020_to_22$Region == 'Non-New York City', ]
-crime_ny_filtered_county_tot_2020_to_22_non_ny <- crime_ny_filtered_county_tot_2020_to_22_non_ny %>% select(c('County', 'Murder', 'Rape', 'Robbery', 'Aggravated.Assault', 'Burglary', 'Larceny', 'Motor.Vehicle.Theft', 'Population'))
-crime_ny_filtered_county_tot_2020_to_22_non_ny <- crime_ny_filtered_county_tot_2020_to_22_non_ny %>% 
+crime_ny_filtered_county_tot_since_2010 <- crime_ny_filtered_county_tot %>%
+  filter(Year >= 2010) %>%
   group_by(County) %>%
-  summarise_each(list(sum))
+  summarise(across(everything(), sum))
 
-crime_ny_filtered_county_tot_2020_to_22_non_ny[ , 2:8] <- 10000*crime_ny_filtered_county_tot_2020_to_22_non_ny[, 2:8]/crime_ny_filtered_county_tot_2020_to_22_non_ny$Population
-
-draw_biplot(crime_ny_filtered_county_tot_2020_to_22_non_ny[ , 1:8], 'Rape', project = T)
-```
-
-
-```{r}
-crime_ny_filtered_county_tot_2020_to_22_ny <- crime_ny_filtered_county_tot_2020_to_22[crime_ny_filtered_county_tot_2020_to_22$Region != 'Non-New York City', ]
-crime_ny_filtered_county_tot_2020_to_22_ny <- crime_ny_filtered_county_tot_2020_to_22_ny %>% select(c('County', 'Murder', 'Rape', 'Robbery', 'Aggravated.Assault', 'Burglary', 'Larceny', 'Motor.Vehicle.Theft', 'Population'))
-crime_ny_filtered_county_tot_2020_to_22_ny <- crime_ny_filtered_county_tot_2020_to_22_ny %>% 
-  group_by(County) %>%
-  summarise_each(list(sum))
-
-crime_ny_filtered_county_tot_2020_to_22_ny[ , 2:8] <- 10000*crime_ny_filtered_county_tot_2020_to_22_ny[, 2:8]/crime_ny_filtered_county_tot_2020_to_22_ny$Population
-
-draw_biplot(crime_ny_filtered_county_tot_2020_to_22_ny[ , 1:8], 'Rape', project = T)
-```
-
-
-## Impact of stop-and-frisk on crime statistics under Bloomberg
-
-
-```{r}
-NYC <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Region == 'New York City', ]
-columns_to_plot <- c("Murder", "Rape", "Robbery", "Aggravated.Assault", "Burglary", "Larceny", "Motor.Vehicle.Theft")
-NYC_long <- tidyr::gather(NYC, key = "Variable", value = "Value", columns_to_plot)
-NYC_long_summarized <- NYC_long %>%
-  group_by(Year, Variable) %>%
-  summarise(Sum_Value = sum(Value, na.rm = TRUE),
-            Population = sum(Population)) %>%
-  ungroup()
-
-# ggplot(NYC, aes(x = Year)) +
-#   geom_point(aes(y = Murder), color = "red", linetype = "solid", size = 1) +
-#   geom_point(aes(y = Rape), color = "blue", linetype = "solid", size = 1) +
-#   geom_point(aes(y = Robbery), color = "green", linetype = "solid", size = 1) +
-#   labs(title = "Time Series Plot for Individual Columns in NYC County",
-#        x = "Year",
-#        y = "Value") +
-#   theme_minimal()
-
-ggplot(NYC_long_summarized, aes(x = Year, y = Sum_Value/Population, color = Variable)) +
-  geom_line() +
-  scale_color_manual(values = my_palette) +
-  labs(title = "Crime/population per Year for Counties with least increase post-covid",
-       x = "Year",
-       y = "Crime/population") +
+draw_biplot(crime_ny_filtered_county_tot_since_2010[,c(1,3:9)], 
+            project = F,
+            point_labels = T, 
+            point_size = .4) +
+  labs(title = 'Biplot of crime rate (per 1000 population) from 2010 to 2022') +
   theme_minimal()
 
 ```
 
-```{r}
+The crime-type "clusters" remain relatively constant, though they are slightly more "spread out." Furthermore, the NYC counties (except Richmond) are strongly aligned along the robbery-cluster axis. Also the Richmond, Nassau, Westchester and Suffolk cluster remains relatively intact. The very eastern counties towards the Canadian border (Niagara, Erie, Monroe) seem to have particularly high numbers in vehicle thefts. It is quite surprising that the broad strokes of this picture remains relatively constant across time - a more in-depth analysis showed that that is the case for various other time periods - which means that one could attempt to interpret clusters and groupings using a demographic analysis by county.
+
+Let us finally focus on the NYC Counties and their biplot for the most recent couple of years.
+
+```{r, message=FALSE, warning=FALSE}
+crime_ny_filtered_county_tot_since_2020_NY <- crime_ny_filtered_county_tot %>%
+  filter(Year >= 2020 & County %in% c('Richmond','New York','Kings', 'Queens','Bronx')) %>%
+  group_by(County) %>%
+  summarise(across(everything(), sum))
+
+draw_biplot(crime_ny_filtered_county_tot_since_2020_NY[,c(1,3:9)], 
+            project = T,
+            point_labels = T, 
+            point_size = 1,
+            'Robbery') +
+  labs(title = 'Biplot of crime rate (per 1000 population) from 2020 to 2022 in NYC') +
+  theme_minimal()
+```
+
+It seems like among the five Boroughs, robbery is the most discerning crime type. We furthermore notice that rape is aligned with aggravated assault and murder, which makes sense to us. Manhattan seems to be comparatively strongly associated with "property crimes" (larceny and burglary), while Bronx county is strongly associated with the "violent crimes" (rape, aggravated assault and murder).
+
+We conclude this section by remarking that this type of plot paints a really interesting picture. A more in-depth analysis of the socioeconomic and demographics of the counties would be very interesting and potentially insightful.
+
+## Analysis of Crime Trends {#crime-patterns}
+
+We briefly touched upon the general shift in crime types within New York City and across the state, particularly in relation to the COVID-19 pandemic, as detailed [here](#crime-by-type). This provided a broad overview of trends in the past two decades. We now investigate further the evolution of individual crime categories over time.
+
+```{r, message=FALSE, warning=FALSE}
+
 non_NYC <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Region != 'New York City', ]
-columns_to_plot <- c("Murder", "Rape", "Robbery", "Aggravated.Assault", "Burglary", "Larceny", "Motor.Vehicle.Theft")
+columns_to_plot <- c("Murder", "Rape", "Robbery", "Aggravated.Assault", 
+                     "Burglary", "Larceny", "Motor.Vehicle.Theft")
 non_NYC_long <- tidyr::gather(non_NYC, key = "Variable", value = "Value", columns_to_plot)
 
 non_NYC_long_summarized <- non_NYC_long %>%
@@ -566,88 +611,75 @@ non_NYC_long_summarized <- non_NYC_long %>%
             Population = sum(Population)) %>%
   ungroup()
 
-# ggplot(NYC, aes(x = Year)) +
-#   geom_point(aes(y = Murder), color = "red", linetype = "solid", size = 1) +
-#   geom_point(aes(y = Rape), color = "blue", linetype = "solid", size = 1) +
-#   geom_point(aes(y = Robbery), color = "green", linetype = "solid", size = 1) +
-#   labs(title = "Time Series Plot for Individual Columns in NYC County",
-#        x = "Year",
-#        y = "Value") +
-#   theme_minimal()
-# ggplot(non_NYC_long_summarized, aes(x = Year, y = Sum_Value/Population, color = Variable)) +
-#   geom_line() +
-#   scale_color_manual(values = my_palette) +
-#   labs(title = "Crime/population per Year for Counties with least increase post-covid",
-#        x = "Year",
-#        y = "Crime/population") +
-#   theme_minimal()
+NYC <- crime_ny_with_fips_and_pop[crime_ny_with_fips_and_pop$Region == 'New York City', ]
+NYC_long <- tidyr::gather(NYC, key = "Variable", value = "Value", columns_to_plot)
+
+NYC_long_summarized <- NYC_long %>%
+  group_by(Year, Variable) %>%
+  summarise(Sum_Value = sum(Value, na.rm = TRUE),
+            Population = sum(Population)) %>%
+  ungroup()
 
 combined_NYC <- rbind(
   mutate(NYC_long_summarized, Location = "NYC"),
   mutate(non_NYC_long_summarized, Location = "Non-NYC")
 )
 
+# order: 
+reasonable_order <- c("Robbery", "Aggravated.Assault", "Rape", "Murder", 
+                   "Larceny", "Motor.Vehicle.Theft", "Burglary")
+combined_NYC$Variable <- factor(combined_NYC$Variable, levels = reasonable_order)
+
 ggplot(combined_NYC, 
        aes(x = Year, 
-           y = Sum_Value/Population, 
+           y = 1000*Sum_Value/Population, 
            color = Location, 
            group = Location)) +
   geom_line() +
+  geom_point(size = 0.3) + 
   labs(title = "NYC vs Non-NYC",
        x = "Year",
-       y = "Crime/population") +
+       y = "Incidents per (1000 population)",
+       color = "Area") +
   scale_color_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
   theme_minimal() +
-  facet_wrap(~Variable, scales = "free_y")
+  facet_wrap(~Variable, 
+             scales = "free_y",
+             nrow = 2) +
+  scale_y_continuous(limits = c(0, NA))
+
 ```
 
-```{r}
+In the first row of the graph, we show the crime type categorized as "violent crimes", while in the second row, we show the ones categorized as "property crimes". We have learned that there is quite a difference between NYC and non-NYC counties, and therefore look at the data separated among those two categories.
 
-combined_NYC_bloomb <- combined_NYC[(combined_NYC$Year > 1999) & (combined_NYC$Year < 2015), ]
+We shall discuss the apparent jump in rape incidents in the [following](#Rape). Other than that, and apart from the COVID-bump after 2020, we observe that the incidents for each crime type has steadily decreased over the past 30 years. Especially motor vehicle thefts have gone through a steep decline in the 90s. Again, we believe that this is partially due to the advancement of security systems of cars. 
 
-ggplot(combined_NYC_bloomb, 
-       aes(x = Year, 
-           y = Sum_Value/Population, 
-           color = Location, 
-           group = Location)) +
-  geom_line() +
-  labs(title = "NYC vs Non-NYC",
-       x = "Year",
-       y = "Crime/population") +
-  scale_color_manual(values = c("NYC" = "blue", 
-                                "Non-NYC" = "red")) +
-  theme_minimal() +
-  facet_wrap(~Variable, scales = "free_y")
-```
+While most categories seem to decrease through the 2000s, aggravated assault numbers remains relatively constant and eventually even increased in the late 2010s and early 2020s in NYC. We did not find an underlying reason for this increase; it could be due to various factors such as reporting inconsistencies, legislative policies, or socioeconomic factors. We will delve a bit deeper into that period when we try to analyse the efficacy of ["stop-and-frisk"](#stop-and-frisk).
 
-During 2002 - 2012, NYC imposed stop-and-frisk, we compare NYC crime reports (for 7 major crime stats) vs non-NYC. If the stop and frisk had any effect, we expect NYC crime stats to decrease stronger than non-NYC. Logic: stop and frisk -> "create more safety" -> less crime overall. 
+### The curious case of Rape Incidents {#Rape}
 
-There are various flaws with our analysis: Do not consider other effects, etc.
+The main thing that jumps out in the above graph is the (relatively) massive jump in rape incident numbers from 2014 to 2015 in all of NY State. The reason for this jump is actually due to an ["expanded definition"](https://www.criminaljustice.ny.gov/crimnet/ojsa/NYSCrimeReport2015.pdf) of the crime. In short, the FBI implemented a [change in definition](https://www.criminaljustice.ny.gov/crimnet/ojsa/rape_memo.pdf) to "more accurately reflect the scope and volume of sexual assaults nationwide." Therefore, we should refrain from inferring and comparing rape incident numbers across 2014.
 
-To compare set starting point the same:
+### Examining the Influence of "Operation Impact" and Stop-and-Frisk Policies {#stop-and-frisk}
 
-```{r}
+
+We now address another interesting question: Does our dataset offer any insights into the impact of "stop-and-frisk", or more specifically, the ["Operation Impact"](https://www.nyc.gov/html/unccp/gprb/downloads/pdf/NYC_Safety%20and%20Security_Operation%20Impact.pdf) initiative during Mayor Bloomberg's administration on crime rates in NYC? Many other studies have investigated stop-and-frisk effects using more directly related data, but our focus here is to analyze any potential correlation from the perspective of our dataset. We aim to investigate the hypothesis that "Operation Impact" and stop-and-frisk should decrease the overall crimes committed. In particular, our goal is to discern whether crime statistics in NYC, where stop-and-frisk was heavily enforced, show a more pronounced decline compared to other NY State counties.
+
+The "stop-and-frisk" policy allows police officers to stop, question, and search individuals they suspect of criminal activity. The practice is often associated with Bloomberg's time as Mayor of NYC (2002-2013). It was especially prevalent around 2011 where over 685,000 stops were [recorded](https://www.nyclu.org/en/stop-and-frisk-data). The practice came under scrutiny and was declared unconstitutional and racially biased in the court case of Floyd v. City of New York in 2013. Following Mayor Bill de Blasio's election in 2014, the frequency of stop-and-frisk plummeted.
+
+While there are many in-depth [analyse](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0157223) discerning the efficacy of stop-and-frisk, we believe that our dataset provides an interesting, alternative perspective allowing us to apply various techniques to assess its impact.
+
+In our analysis, we will compare crime rates in NYC during the stop-and-frisk era against those in other NY counties. We specifically examine the periods before 2002, between 2002-2013, and after 2014, and hypothesize that any significant policy effects would be most explicit from around 2006 to 2012. It is important to note, however, that our dataset may not cleanly distinguish the effects of stop-and-frisk from other strategies, such as heightened police presence in high-crime areas ("Operation Impact"), and we might observe impacts more attributable to the latter than to stop-and-frisk itself, as suggested by this [report](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0157223).
+
+We start by employing a time-series technique in which we adjust and normalize the time series data such that the starting value is fixed to 100. This should allow us to more carefully analyse the changes in crime data between NYC and non-NYC counties. We are mostly interested in the middle ("stop-and-frisk") period and how it compares to the pre- and the post stop-and-frisk eras as well as how the NYC data compares to the non-NYC data.
+
+```{r, message=FALSE, warning=FALSE}
+
+# pre stop-and-frisk
 combined_NYC_bloomb <- combined_NYC %>%
-  filter(Year > 1999 & Year < 2015) %>%
-  group_by(Variable, Location) %>%
-  mutate(adjusted_value = Sum_Value/Population - first(Sum_Value/Population))
-
-ggplot(combined_NYC_bloomb, aes(x = Year, y = adjusted_value, color = Location, group = Location)) +
-  geom_line() +
-  labs(title = "Adjusted NYC vs Non-NYC",
-       x = "Year",
-       y = "Adjusted") +
-  scale_color_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
-  theme_minimal() +
-  facet_wrap(~Variable, scales = "free_y")
-```
-
-
-```{r}
-
-combined_NYC_bloomb <- combined_NYC %>%
-  filter(Year > 1980 & Year <=2002) %>%
+  filter(Year > 1980 & Year <2002) %>%
   group_by(Variable, Location)
+
 combined_NYC_bloomb1 <- combined_NYC_bloomb %>%
   group_by(Year, Location) %>%
   summarise(Sum_Value = sum(Sum_Value, na.rm = TRUE),
@@ -655,10 +687,11 @@ combined_NYC_bloomb1 <- combined_NYC_bloomb %>%
   ungroup()
 combined_NYC_bloomb1 <- combined_NYC_bloomb1 %>%
   group_by(Location) %>% 
-  mutate(adjusted_value = Sum_Value/Population - first(Sum_Value/Population))
+  mutate(adjusted_value = 100*Sum_Value/Population/first(Sum_Value/Population))
 
+# during stop-and-frisk
 combined_NYC_bloomb <- combined_NYC %>%
-  filter(Year >= 2002 & Year <=2012) %>%
+  filter(Year >= 2002 & Year <=2013) %>%
   group_by(Variable, Location)
 combined_NYC_bloomb2 <- combined_NYC_bloomb %>%
   group_by(Year, Location) %>%
@@ -667,10 +700,11 @@ combined_NYC_bloomb2 <- combined_NYC_bloomb %>%
   ungroup()
 combined_NYC_bloomb2 <- combined_NYC_bloomb2 %>%
   group_by(Location) %>% 
-  mutate(adjusted_value = Sum_Value/Population - first(Sum_Value/Population))
+  mutate(adjusted_value = 100*Sum_Value/Population/first(Sum_Value/Population))
 
+# after stop-and-frisk
 combined_NYC_bloomb <- combined_NYC %>%
-  filter(Year >= 2012 & Year <=2042) %>%
+  filter(Year > 2013 & Year <=2042) %>%
   group_by(Variable, Location)
 combined_NYC_bloomb3 <- combined_NYC_bloomb %>%
   group_by(Year, Location) %>%
@@ -679,49 +713,96 @@ combined_NYC_bloomb3 <- combined_NYC_bloomb %>%
   ungroup()
 combined_NYC_bloomb3 <- combined_NYC_bloomb3 %>%
   group_by(Location) %>% 
-  mutate(adjusted_value = Sum_Value/Population - first(Sum_Value/Population))
+  mutate(adjusted_value = 100*Sum_Value/Population/first(Sum_Value/Population))
 
-ggplot(combined_NYC_bloomb1, aes(x = Year, y = adjusted_value, color = Location, group = Location)) +
+# add period
+combined_NYC_bloomb1 <- combined_NYC_bloomb1 %>%
+  mutate(Period = "Pre Stop-and-Frisk")
+combined_NYC_bloomb2 <- combined_NYC_bloomb2 %>%
+  mutate(Period = "During Stop-and-Frisk")
+combined_NYC_bloomb3 <- combined_NYC_bloomb3 %>%
+  mutate(Period = "Post Stop-and-Frisk")
+
+# combine
+combined_periods <- bind_rows(combined_NYC_bloomb1, 
+                              combined_NYC_bloomb2, 
+                              combined_NYC_bloomb3)
+
+# order:
+combined_periods$Period <- factor(combined_periods$Period, 
+                                  levels = c("Pre Stop-and-Frisk", "During Stop-and-Frisk", "Post Stop-and-Frisk"))
+
+# plot
+ggplot(combined_periods, aes(x = Year, y = adjusted_value, color = Location, group = Location)) +
   geom_line() +
-  labs(title = "NYC vs Non-NYC",
+  geom_point(size = 0.4) + 
+  labs(title = "NYC vs non-NYC crime rates over different periods",
        x = "Year",
-       y = "Crime/population") +
+       y = "Adjusted Crime Rate (per 1000 population, first year = 100)") +
   scale_color_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
-  theme_minimal()
+  theme_minimal() +
+  facet_wrap(~Period, 
+             scales = "free_x", 
+             ncol = 3) +
+  scale_x_continuous(breaks = function(x) seq(floor(min(x)), ceiling(max(x)), by = 1)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  scale_y_continuous(limits = c(0, NA))
 
-ggplot(combined_NYC_bloomb2, aes(x = Year, y = adjusted_value, color = Location, group = Location)) +
-  geom_line() +
-  labs(title = "NYC vs Non-NYC",
-       x = "Year",
-       y = "Crime/population") +
-  scale_color_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
-  theme_minimal()
-
-ggplot(combined_NYC_bloomb3, aes(x = Year, y = adjusted_value, color = Location, group = Location)) +
-  geom_line() +
-  labs(title = "NYC vs Non-NYC",
-       x = "Year",
-       y = "Crime/population") +
-  scale_color_manual(values = c("NYC" = "blue", "Non-NYC" = "red")) +
-  theme_minimal()
-```
-
-
-```{r}
-
-
-ggplot(combined_NYC, aes(x=Year, y=Sum_Value, fill=Variable)) + 
-    geom_area()+
-  labs(title = "Stacked Area Plot of Crime Types",
-       x = "Year",
-       y = "Crime")+
-  theme_minimal()+
-  facet_wrap(~Location, ncol = 1)
 
 ```
 
+In the graph, we naively observe that the NYC crime numbers decrease more rapidly during the "stop-and-frisk" period compared to the non-NYC counties. However, we also note that they did so in the pre-stop-and-frisk era as well. What is interesting is that once de Blasio took office, the crime rate in non-NYC counties decreases faster than in NYC. We further observe that this trend is already changing around 2009, where the decrease in NYC somewhat halts. This plateau might suggest that the initial steep decrease in crime rates was not sustained at the same rate during the height of stop-and-frisk. Meanwhile, non-NYC counties continue to experience a gradual decrease, although they show slight fluctuations in the trend.
 
-<!-- 
-https://www.nyclu.org/en/stop-and-frisk-data
--->
+These trends suggest that while there was a general decline in crime during the stop-and-frisk years, it is not possible to attribute this entirely to the policy without further, more detailed analysis. The fact that crime rates also decreased in non-NYC areas, where stop-and-frisk was not implemented, indicates that other factors may have influenced the downward trend.
 
+Additionally, the post stop-and-frisk period uptick raises questions about the long-term efficacy of the policy. If stop-and-frisk had been an actual efficient crime deterrent, one would naively expect crime rates to remain low or at least not to increase immediately once the policy was no longer in use.
+
+We shall now look at the evolution of the crime types during the stop-and-frisk period, to see whether we can spot any interesting patterns.
+
+```{r, message=FALSE, warning=FALSE}
+
+# during stop-and-frisk
+combined_NYC_bloomb <- combined_NYC %>%
+  filter(Year >= 2002 & Year <=2013) %>%
+  group_by(Variable, Location)
+combined_NYC_bloomb2 <- combined_NYC_bloomb %>%
+  group_by(Year, Location, Variable) %>%
+  summarise(Sum_Value = sum(Sum_Value, na.rm = TRUE),
+            Population = sum(Population)) %>%
+  ungroup()
+combined_NYC_bloomb2 <- combined_NYC_bloomb2 %>%
+  group_by(Location, Variable) %>% 
+  mutate(adjusted_value = 100*Sum_Value/Population/first(Sum_Value/Population))
+
+reasonable_order <- c("Robbery", "Aggravated.Assault", "Rape", "Murder", 
+                   "Larceny", "Motor.Vehicle.Theft", "Burglary")
+combined_NYC_bloomb2$Variable <- factor(combined_NYC_bloomb2$Variable, 
+                                        levels = reasonable_order)
+
+ggplot(combined_NYC_bloomb2, 
+       aes(x = Year, 
+           y = adjusted_value, 
+           color = Location, 
+           group = Location)) +
+  geom_line() +
+  labs(title = "Crime evolution by type during stop-and-frisk period",
+       x = "Year",
+       y = "Adjusted Crime Rate (per 1000 population, first year = 100)") +
+  scale_color_manual(values = c("NYC" = "blue", 
+                                "Non-NYC" = "red")) +
+  theme_minimal() +
+  facet_wrap(~Variable, 
+             nrow = 2) +
+  scale_x_continuous(breaks = function(x) seq(floor(min(x)), ceiling(max(x)), by = 1)) +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   hjust = 1, 
+                                   size = 7)) + 
+  scale_y_continuous(limits = c(0, 120))
+
+```
+
+Looking at the robbery, aggravated assault, rape, and murder trends, there is a clear decline in both NYC and non-NYC areas over the years. However, the rates of decline are not larger in NYC compared to non-NYC areas, which one might naively expect if stop-and-frisk was highly effective. For instance, the decline in robbery rates is quite similar in both regions, and aggravated assault rates actually show a slight increase in later years for NYC.
+
+We observe that the decline in the number of burglaries in NYC is the steepest compared with the non-NYC counterpart. Burglaries is a type of crime that we do not believe should be related to any potential "stop-and-frisk" policies. On the other hand, changes in aggravated assault numbers remained comparatively equal between NYC and non-NYC counties, which is something that additional police presence could certainly influence.
+
+Finally, we remark that in the [report](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0157223) by members of the University of Pennsylvania, they found that while extra police deployment to high crime areas in NYC (Operation Impact) contributed to a major decline in crime (12% to 15% reduction), the additional use of stop-and-frisk made almost no difference. So the decreasing crime effects should probably not be attributed to stop-and-frisk but rather to the overall efforts of the NYPD in high crime areas.
