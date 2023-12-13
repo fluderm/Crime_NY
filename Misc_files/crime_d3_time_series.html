@@ -31,7 +31,7 @@
     <script>
         var csvUrl = "https://raw.githubusercontent.com/fluderm/Crime_NY/main/data/crime_NY_d3.csv";
 
-        var margin = {top: 20, right: 20, bottom: 50, left: 50}, // Increased bottom margin for y-axis label
+        var margin = {top: 20, right: 20, bottom: 50, left: 50},
             width = 960 - margin.left - margin.right,
             height = 500 - margin.top - margin.bottom;
 
@@ -79,7 +79,7 @@
             var processedData = {};
             allData.forEach(function(d) {
                 var county = d.County;
-                var year = new Date(d.Year, 0); // Convert year to Date object
+                var year = new Date(d.Year, 0); 
                 if (!processedData[county]) {
                     processedData[county] = [];
                 }
@@ -104,7 +104,7 @@
             d3.select("#columnSelect").on("change", function() {
                 selectedColumn = this.value;
                 updateGraph(selectedCounties, selectedColumn, startYear, endYear);
-                updateYAxisLabel(selectedColumn); // Update y-axis label
+                updateYAxisLabel(selectedColumn); 
             });
 
             colorScale.domain(counties);
@@ -120,7 +120,7 @@
                 .call(d3.axisLeft(y));
 
             updateGraph([], selectedColumn, startYear, endYear);
-            updateYAxisLabel(selectedColumn); // Initialize y-axis label
+            updateYAxisLabel(selectedColumn); 
 
             function updateGraph(selectedCounties, selectedColumn, startYear, endYear) {
                 // filter:
@@ -136,9 +136,9 @@
 
                 // x-domain based on selected years
                 if (startYear !== undefined && endYear !== undefined && startYear <= endYear) {
-                    x.domain([new Date(startYear, 0, 1), new Date(endYear, 11, 31)]); // Start of startYear and end of endYear
+                    x.domain([new Date(startYear, 0, 1), new Date(endYear, 11, 31)]); 
                 } else {
-                    x.domain([new Date(1990, 0, 1), new Date(2022, 11, 31)]); // Default range
+                    x.domain([new Date(1990, 0, 1), new Date(2022, 11, 31)]); 
                 }
                 svg.select(".x.axis").transition().duration(1000).call(d3.axisBottom(x));
 
@@ -180,7 +180,6 @@
 
                 var circles = svg.selectAll("circle")
                     .data(filteredDataByCounty.flatMap(d => d.data.map(point => ({ ...point, county: d.county }))), function(d) {
-                        // Use a unique identifier for each circle based on county and year
                         return d.county + d.year;
                     });
 
