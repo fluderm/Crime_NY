@@ -171,26 +171,36 @@ ul.task-list li input[type="checkbox"] {
   * {
     font-family: sans-serif;
   }
+  #plot {
+  position: relative;
+  }
+  #slider, #countyDropdown {
+    position: relative;
+  }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <!-- <script src="scripts/myscript.js"></script> -->
 <section id="time-series-change-title" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="time-series-change-title"><span class="header-section-number">4.1</span> Time series (change title)</h2>
 <p>Write some stuff</p>
-
-
+<div>
 <p><label for="startYear">Start Year:</label> <select id="startYear"></select></p>
 <p><label for="endYear">End Year:</label> <select id="endYear"></select> <br></p>
-<p><select id="countySelect" multiple="" style="width: 200px; height: 150px;"></select> <select id="columnSelect"> <option value="Index.Total">Index Total</option> <option value="Violent.Total">Violent Total</option> <option value="Murder">Murder</option> <option value="Rape">Rape</option> <option value="Robbery">Robbery</option> <option value="Aggravated.Assault">Aggravated Assault</option> <option value="Property.Total">Property Total</option> <option value="Burglary">Burglary</option> <option value="Larceny">Larceny</option> <option value="Motor.Vehicle.Theft">Motor Vehicle Theft</option> </select></p>
-<svg width="960" height="500">
+<p><select id="countySelect" multiple="" style="width: 200px; height: 150px;"></select> <br> <select id="columnSelect"> <option value="Index.Total">Index Total</option> <option value="Violent.Total">Violent Total</option> <option value="Murder">Murder</option> <option value="Rape">Rape</option> <option value="Robbery">Robbery</option> <option value="Aggravated.Assault">Aggravated Assault</option> <option value="Property.Total">Property Total</option> <option value="Burglary">Burglary</option> <option value="Larceny">Larceny</option> <option value="Motor.Vehicle.Theft">Motor Vehicle Theft</option> </select></p>
+<svg id="svg1" width="600" height="400">
 </svg>
 <script src="scripts/ts.js"></script>
-
-
+</div>
 </section>
 <section id="yours-change-title" class="level2" data-number="4.2">
 <h2 data-number="4.2" class="anchored" data-anchor-id="yours-change-title"><span class="header-section-number">4.2</span> Yours (change title)</h2>
 <p>Write some stuff</p>
+<div id="plot">
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://d3js.org/d3-scale.v2.min.js"></script>
+<script src="scripts/myscript.js"></script>
+</div>
 
 
 </section>
