@@ -144,8 +144,8 @@ ggplot(na_rows_cnt,
   labs(title = "Percentage of Missing \"Months Collected\" Values by County",
        x = "County", y = "Missing Percentage") +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
-
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme_minimal()
 
 ```
 
@@ -176,7 +176,8 @@ ggplot(merged_data,
        x = "County", 
        y = "Percentage of <12 vs 12 Months Collected") +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme_minimal()
 
 ```
 
@@ -293,7 +294,7 @@ ggplot(mismatch_rows_long_indextot_pl,
   geom_bar(position = "dodge", 
            stat = "identity", 
            width = 0.7) +
-  labs(title = "Difference between \"County Total\" values and summed up values", 
+  labs(title = "Difference Between \"County Total\" Values and Summed up values", 
        x = "Year + County", 
        y = "Total Number of Crimes") +
   scale_fill_manual(values = c("County Total" = "blue", 
@@ -331,7 +332,8 @@ ggplot(result,
   labs(title = "Percentage of Available Data in Each Column",
        x = "Column",
        y = "Available Percentage") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme_minimal()
 
 #library(redav)
 #
@@ -356,7 +358,7 @@ ggplot(pop_ny_full_state,
                             fill = Type)) +
   geom_col(position = "dodge", 
            width = 0.9) + 
-  labs(title = "Population (estimate) per Year", 
+  labs(title = "Population (Estimate) per Year", 
        x = "Year", 
        y = "Population (in Millions)") +
   scale_fill_manual(values = c("Census Base Population" = "blue", 
