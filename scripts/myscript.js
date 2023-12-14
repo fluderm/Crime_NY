@@ -139,7 +139,7 @@
       //sliderContainer.append("label")
       //    .attr("for", "countyDropdown")
       //    .style("font-size", "10px")
-      //    .text("You can select several counties");
+      //    .text("Choose counties");
 
       var countyDropdown = sliderContainer.append("select")
         .attr("id", "countyDropdown")
@@ -166,7 +166,7 @@
       //    .attr("for", "yearRange")
       //    .style("font-size", "10px")
       //    .style("font-weight", "bold")
-      //    .text("years: 1990-2022");
+      //    .text("Choose year (1990-2022)");
 
       //var text1 = sliderContainer.append("text")
       //.attr("text-anchor", "middle")
