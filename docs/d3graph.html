@@ -138,7 +138,14 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#time-series-change-title" id="toc-time-series-change-title" class="nav-link active" data-scroll-target="#time-series-change-title"><span class="header-section-number">4.1</span> Time series (change title)</a></li>
+  <li><a href="#yours-change-title" id="toc-yours-change-title" class="nav-link" data-scroll-target="#yours-change-title"><span class="header-section-number">4.2</span> Yours (change title)</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/fluderm/Crime_NY/edit/main/d3graph.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/fluderm/Crime_NY/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -165,13 +172,28 @@ ul.task-list li input[type="checkbox"] {
     font-family: sans-serif;
   }
 </style>
-<div id="plot">
-
-</div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-<script src="scripts/myscript.js"></script>
+<!-- <script src="scripts/myscript.js"></script> -->
+<section id="time-series-change-title" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="time-series-change-title"><span class="header-section-number">4.1</span> Time series (change title)</h2>
+<p>Write some stuff</p>
 
 
+<p><label for="startYear">Start Year:</label> <select id="startYear"></select></p>
+<p><label for="endYear">End Year:</label> <select id="endYear"></select> <br></p>
+<p><select id="countySelect" multiple="" style="width: 200px; height: 150px;"></select> <select id="columnSelect"> <option value="Index.Total">Index Total</option> <option value="Violent.Total">Violent Total</option> <option value="Murder">Murder</option> <option value="Rape">Rape</option> <option value="Robbery">Robbery</option> <option value="Aggravated.Assault">Aggravated Assault</option> <option value="Property.Total">Property Total</option> <option value="Burglary">Burglary</option> <option value="Larceny">Larceny</option> <option value="Motor.Vehicle.Theft">Motor Vehicle Theft</option> </select></p>
+<svg width="960" height="500">
+</svg>
+<script src="scripts/ts.js"></script>
+
+
+</section>
+<section id="yours-change-title" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="yours-change-title"><span class="header-section-number">4.2</span> Yours (change title)</h2>
+<p>Write some stuff</p>
+
+
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -427,7 +449,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/fluderm/Crime_NY/edit/main/d3graph.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/fluderm/Crime_NY/issues/new" class="toc-action">Report an issue</a></p></div></div></div>
+    </div>
     <div class="nav-footer-right">This book was built with <a href="https://quarto.org/">Quarto</a>.</div>
   </div>
 </footer>

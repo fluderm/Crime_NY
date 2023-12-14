@@ -87,6 +87,10 @@ crime_ny_filtered <- crime_ny %>%
          )
 crime_ny_filtered_county_tot <- crime_ny_filtered[crime_ny_filtered$Agency=='County Total',]
 
+crime_ny_with_fips_and_pop_d3 <- crime_ny_with_fips_and_pop
+crime_ny_with_fips_and_pop_d3[,6:15] <- 1000*crime_ny_with_fips_and_pop_d3[,6:15]/crime_ny_with_fips_and_pop_d3$Population
+crime_ny_with_fips_and_pop_d3 <- crime_ny_with_fips_and_pop_d3 |> select(!Agency & !Months.Reported & !FIPS)
+write.csv(crime_ny_with_fips_and_pop_d3, "crime_NY_d3.csv", row.names=FALSE)
 ```
 
 ```{r}
