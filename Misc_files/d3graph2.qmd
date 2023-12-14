@@ -1,0 +1,15 @@
+<style>
+  * {
+    font-family: sans-serif;
+  }
+</style>
+  
+<div id="plot">
+</div>
+    
+<div id="slider">
+</div>
+      
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://d3js.org/d3-scale.v2.min.js"></script>
+<script src="myscript.js"></script>
