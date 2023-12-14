@@ -6,8 +6,42 @@
   }
 </style> 
 
-<div id="plot">
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-<script src="scripts/myscript.js"></script>
+<!-- <script src="scripts/myscript.js"></script> -->
+
+## Time series (change title)
+
+Write some stuff
+
+<html>
+<body>
+    <label for="startYear">Start Year:</label>
+    <select id="startYear"></select>
+
+    <label for="endYear">End Year:</label>
+    <select id="endYear"></select>
+    <br>
+
+    <select id="countySelect" multiple style="width: 200px; height: 150px;"></select>
+    <select id="columnSelect">
+        <option value="Index.Total">Index Total</option>
+        <option value="Violent.Total">Violent Total</option>
+        <option value="Murder">Murder</option>
+        <option value="Rape">Rape</option>
+        <option value="Robbery">Robbery</option>
+        <option value="Aggravated.Assault">Aggravated Assault</option>
+        <option value="Property.Total">Property Total</option>
+        <option value="Burglary">Burglary</option>
+        <option value="Larceny">Larceny</option>
+        <option value="Motor.Vehicle.Theft">Motor Vehicle Theft</option>
+    </select>
+
+    <svg width="960" height="500"></svg>
+
+    <script src="scripts/ts.js"></script>
+</body>
+</html>
+
+## Yours (change title)
+
+Write some stuff
