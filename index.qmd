@@ -19,7 +19,7 @@ library(sp)
 library(sf)
 library(RColorBrewer)
 
-crime_nyc <- read.csv('../data/NYPD_Shooting_Incident_Data__Historic__20231124.csv')
+crime_nyc <- read.csv('data/NYPD_Shooting_Incident_Data__Historic__20231124.csv')
 crime_nyc$OCCUR_DATE <- as.Date(crime_nyc$OCCUR_DATE, format = '%m/%d/%Y')
 
 crime_nyc_nona <- crime_nyc[complete.cases(crime_nyc$Longitude, crime_nyc$Latitude), ]
