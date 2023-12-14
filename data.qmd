@@ -144,8 +144,8 @@ ggplot(na_rows_cnt,
   labs(title = "Percentage of Missing \"Months Collected\" Values by County",
        x = "County", y = "Missing Percentage") +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) 
 
 ```
 
@@ -176,8 +176,8 @@ ggplot(merged_data,
        x = "County", 
        y = "Percentage of <12 vs 12 Months Collected") +
   scale_y_continuous(labels = scales::percent_format(scale = 1)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) 
 
 ```
 
