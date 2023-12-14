@@ -205,7 +205,7 @@
         }
 
         function columnSelectToLabel(column) {
-            // columnSelect value to a readable label
+            // map columnSelect value to a readable label
             switch (column) {
                 case "Index.Total": return "Total Crime Incidents per 1,000 Population";
                 case "Violent.Total": return "Total Violent Incidents per 1,000 Population";

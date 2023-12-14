@@ -1,31 +1,3 @@
-
-<!-- 
-
-II. D. Data
-The data can be pulled from multiple sources; it does not need to be a single dataset. Be sure to get data from the original source. For example, if you wish to work with data collected and distributed by the  Centers for Disease Control, that is where you should go to access the data, not a third party that has posted the data. Do not use datasets that have been processed and cannot be traced to the source. For this reason, you may not use datasets from Kaggle. We encourage a diverse set of projects; for this reason you cannot use datasets that we've seen over and over again: Citibike, Yelp, NYC restaurant ratings, Airbnb, and others. If there's an issue with your data, we will let you know after you turn in Data check -- optional  or PSet 4 -- Final project checkpoint. In addition you can ask during office hours before then.
-
-----------------------------------------------------------------------
-
-  2.1 Technical description
-
-Identify one or more data sources (see II. D. above) that you propose to draw on for the project. For each, describe how the data are collected and by whom. Describe the format of the data, the frequency of updates, dimensions, and any other relevant information. Note any issues / problems with the data, either known or that you discover. Explain how you plan to import the data. Carefully document your sources with links to the precise data sources that you used. If that is not possible (for example if your data is not available online, then explain that clearly.)
-
-(suggested: 1 page)
-
-  2.2 Research plan
-
-Explain in detail how your data will enable you to answer your research questions from the introduction. 
-
-(suggested: 1 page)
-
- 2.3 Missing value analysis
-
-Describe any patterns you discover in missing values. If no values are missing, graphs should still be included showing that.
-
-(suggested: 2 graphs plus commentary)
-
--->
-
 # Data
 
 ## Technical Description
@@ -38,12 +10,11 @@ The data has been collected since January 1990. The frequency of updates is on a
 
 We carefully check that the data is consistent, i.e., that the various accumulations performed within the dataset are correct. We find some inconsistencies in the County Total accumulation in Albany from 1990-1997 and Nassau County in 1990. We discuss this further in the analysis of the missing values.
 
-Since comparing crime numbers among the different counties only really makes sense if we normalize by population, we supplement our primary dataset, [Index Crimes by County and Agency in New York](https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq), with an official population dataset of the counties in NY state. The New York State Department of Labor curated the [population dataset](https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k). It has been updated yearly since 2014 and contains the (estimated) population of each County in NY state by year since 1970.
+Since comparing crime numbers among the different counties only really makes sense if we normalize by population, we supplement our primary dataset, [Index Crimes by County and Agency in New York](https://data.ny.gov/Public-Safety/Index-Crimes-by-County-and-Agency-Beginning-1990/ca8h-8gjq), with an official [population dataset](https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k), curated by the New York State Department of Labor. It has been updated yearly since 2014 and contains the (estimated) population by year of each county in NY state since 1970.
 
 The dataset contains the [FIPS](https://en.wikipedia.org/wiki/Federal_Information_Processing_Standards) ("Federal Information Processing Standards") code of each NY state county, together with the name of the county (“Geography”), the year, and its population estimate. Finally, it includes a column, “Program Type,” detailing how the population number was estimated. The estimations are interpolations or extrapolations of the 10-year census data of NY State. Before 2010, the estimations were based on interpolations since for each year, in between the actual census data, both previous and following census numbers were known. However, after 2010, the data was kept as "point-in-time," and therefore, the estimations were based solely on extrapolating the previous census numbers. It is essential to keep the data point-in-time, as changing the numbers in hindsight would lead to issues with models that use extrapolated data numbers.
 
-The more detailed methodology of the “intercensal estimation” is detailed  [here](https://www.epa.gov/sites/default/files/2015-05/documents/aceappendixb_censusintercensalandpostcensaldata.pdf) and [here](https://www2.census.gov/programs-surveys/popest/technical-documentation/methodology/intercensal/2000-2010-intercensal-estimates-methodology.pdf). Essentially, for intercensal estimates, they combine the data from the two censuses with death, birth, migration, and immigration data to provide an estimate. In contrast, for postcensal forecasts, they use the previous census data and the same external sources to provide an estimate.
-
+The more detailed methodology of the “intercensal estimation” can be found  [here](https://www.epa.gov/sites/default/files/2015-05/documents/aceappendixb_censusintercensalandpostcensaldata.pdf) and [here](https://www2.census.gov/programs-surveys/popest/technical-documentation/methodology/intercensal/2000-2010-intercensal-estimates-methodology.pdf). Essentially, for intercensal estimates, they combine the data from the two censuses with death, birth, migration, and immigration data to provide an estimate. In contrast, for postcensal forecasts, they use the previous census data and the same external sources to provide an estimate.
 
 ## Research plan
 
@@ -51,7 +22,7 @@ To answer research questions related to crime trends and influencing factors, ou
 
 ### Temporal aspects
 
-Given the extensive span of thorough reporting within our primary dataset, we can conduct longitudinal studies, examine crime rates over multiple years, and identify particular trends and patterns. We can do this for all of NY State or county specific and compare trends between counties. For instance, it would be exciting to see whether vastly contrasting trends exist among the different counties.
+Given the extensive span of thorough reporting within our primary dataset, we can conduct ["longitudinal"](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4669300/) studies, examine crime rates over multiple years, and identify particular trends and patterns. We can do this for all of NY State or county specific and compare trends between counties. For instance, it would be exciting to see whether vastly contrasting trends exist among the different counties.
 
 Analyzing the data throughout the years enables assessing whether crime has increased, decreased, or remained stable. This could provide insights into the effectiveness of law enforcement strategies, changes in societal conditions, or potential impacts of specific events such as the COVID-19 pandemic. This could give a more nuanced understanding of the factors influencing crime dynamics. For example, an investigation on the impact of the implementation of "Operation Impact," or commonly known as "stop-and-frisk," could show how this policy has influenced the overall landscape of crime statistics. This exploration could offer compelling insights into the broader narrative of how policies like "stop-and-frisk" interact with and influence regional crime patterns.
 
@@ -399,62 +370,4 @@ ggplot(pop_ny_full_state,
 Notice that we have estimates even for the census years (1990, 2000, 2010, and 2020); Their respective bars are split into two (and of different colors). The intercensal population estimates are in line with the census data (which makes sense), while there is a small jump between the 2019 estimate and the 2020 census data. As we remarked above, this dataset was created in 2014 and kept as point-in-time. Therefore, the forecast will be postcensal for anything after 2010.
 
 The estimates will undoubtedly be good enough for our purposes. We are interested in the ratio crime/population size, and therefore will divide a relatively small number by a large number. Hence, minor errors in the population estimates will not affect any conclusions we draw in the following.
-
-
-
-
-```{r}
-# 
-# ggplot(mismatch_rows_long_indextot, 
-#        aes(x = interaction(Year, County)), 
-#            order = (Year)) +
-#   geom_bar(aes(y = Index.Total.y, 
-#                fill = "County Total values"), 
-#            stat = "identity", 
-#            position = "dodge",
-#            alpha=0.5) +
-#   geom_bar(aes(y = Index.Total.x, 
-#                fill = "Sum of Reported Values by Agencies"), 
-#            stat = "identity", 
-#            position = "dodge",
-#             alpha=0.5) +
-#   labs(title = "Difference between \"County Total\" values and summed up values", 
-#        x = "Year + County", 
-#        y = "Total Number of Crimes") +
-#   scale_fill_manual(values = c("County Total values" = "red", 
-#                                "Sum of Reported Values by Agencies" = "blue")) +
-#   theme_minimal() +
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-#
-# 
-# census_years <- unique(pop_ny_full_state[pop_ny_full_state$Program.Type == 'Census Base Population', ]$Year)
-# 
-# pop_ny_full_state_cens_yrs <- subset(pop_ny_full_state, pop_ny_full_state$Year %in% census_years)
-# 
-# pop_ny_full_state_cens_yrs_wide <- pivot_wider(pop_ny_full_state_cens_yrs, 
-#                        names_from = Program.Type, 
-#                        values_from = Population)
-# colnames(pop_ny_full_state_cens_yrs_wide)
-# 
-# names(pop_ny_full_state_cens_yrs_wide)
-# 
-# ggplot(pop_ny_full_state_cens_yrs_wide, aes(x = Year)) +
-#   geom_point(aes(y = `Census Base Population`, color = "Census Base Population"), 
-#              position = position_dodge(width = 0.4)) +
-#   geom_point(aes(y = `Intercensal Population Estimate`, color = "Intercensal Estimate"), 
-#              position = position_dodge(width = 0.2)) +
-#   geom_point(aes(y = `Postcensal Population Estimate`, color = "Postcensal Estimate"), 
-#              position = position_dodge(width = -0.2)) +
-#   labs(title = "A", x = "B", y = "C") +
-#   scale_color_manual(values = c("Census Base Population" = "blue", 
-#                                 "Intercensal Estimate" = "orange",
-#                                 "Postcensal Estimate" = "red"),
-#                      name = "Legend Title") +
-#   theme_minimal() +
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-
-
 

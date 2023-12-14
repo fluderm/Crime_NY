@@ -7,23 +7,16 @@
       // Set up the initial dimensions and data
       var width = 600;
       var height = 400;
-      var margin = { top: 20, right: 20, bottom: 30, left: 40 };
+      var margin = { top: 20, right: 20, bottom: 50, left: 70 };
 
-      var title = d3.select("div#plot")
-      .append("h1")
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("text-anchor", "middle")
-      .attr("font-size", 20)
-      .attr("font-weight","bold")
-      .text("Bar charts for crimes in NY counties across years");
-
-      var svg = d3.select("div#plot")
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      //var title = d3.select("div#plot")
+      //.append("h1")
+      //.attr("x", 0)
+      //.attr("y", 0)
+      //.attr("text-anchor", "middle")
+      //.attr("font-size", 20)
+      //.attr("font-weight","bold")
+      //.text("Bar charts for crimes in NY counties across years");
 
       // Extract unique counties and years
       var counties = d3.set(data.map(function(d) { return d.County; })).values();
@@ -32,8 +25,59 @@
 
       // Initial values for selected counties and year
       var selectedCounties = [counties[0]];
-      var selectedYear = years[-1];
+      //var selectedYear = years[-1];
+      var selectedYear = years[years.length - 1];
 
+      var sliderContainer = d3.select("div#plot").append("div")
+        .attr("id", "slider");
+
+      sliderContainer.append("label")
+        .attr("for", "countyDropdown")
+        .text("Choose Counties (multiple):");
+
+      var countyDropdown = sliderContainer.append("select")
+        .attr("id", "countyDropdown")
+        .attr("multiple", true)
+        .style("width", "200px")
+        .style("height", "150px")
+        .selectAll("option")
+        .data(counties)
+        .enter()
+        .append("option")
+        .text(function(d) { return d; });
+
+      sliderContainer.append("br");
+
+      sliderContainer.append("label")
+        .attr("for", "yearRange")
+        .text("Choose year (1990-2022) : ");
+
+      var yearRangeLabel = sliderContainer.append("label")
+          .attr("for", "yearRange")
+          .style("font-size", "15px")
+          .text("Year: " + selectedYear);
+
+      var yearRange = sliderContainer.append("input")
+          .attr("type", "range")
+          .attr("id", "yearRange")
+          .style("width", "200px")
+          .attr("min", d3.min(years))
+          .attr("max", d3.max(years))
+          .attr("value", selectedYear)
+          .on("input", function() {
+              selectedYear = this.value;
+              yearRangeLabel.text("Year: " + selectedYear); // Update label text when slider changes
+              updatePlot();
+          });
+
+      sliderContainer.append("br");
+
+      var svg = d3.select("div#plot")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // Function to update the plot based on selected counties and year
     function updatePlot() {
@@ -64,7 +108,8 @@
         .padding(0.1);
 
       var y = d3.scaleLinear()
-        .domain([0, d3.max(data, function(d) { return d3.max(["Murder", "Rape","Robbery","Aggravated Assault", "Burglary","Larceny","Motor Vehicle Theft"].map(function(key) { return +d[key]; })); })])
+        .domain([0, d3.max(data, function(d) {
+          return d3.max(["Murder", "Rape","Robbery","Aggravated Assault", "Burglary","Larceny","Motor Vehicle Theft"].map(function(key) { return +d[key]; })); })])
         .range([height, 0]);
 
       var xAxis = d3.axisBottom(x);
@@ -80,6 +125,14 @@
 
       svg.append("g")
         .call(yAxis);
+
+      svg.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 0 - margin.left)
+          .attr("x", 0 - (height / 2))
+          .attr("dy", "1em")
+          .style("text-anchor", "middle")
+          .text("Number of Incidents");
 
       // Add individual bars for each crime category
       ["Murder", "Rape", "Robbery", "Aggravated Assault", "Burglary", "Larceny", "Motor Vehicle Theft"].forEach(function(key, i) {
@@ -117,7 +170,6 @@
 
     }
 
-
     updatePlot();
 
     // Event listener for dropdown changes
@@ -131,54 +183,11 @@
       }
     });
 
-
-      var sliderContainer = d3.select("div#plot").append("div")
-        .attr("id", "slider")
-        .style("margin-top", "20px");
-
       //sliderContainer.append("label")
       //    .attr("for", "countyDropdown")
       //    .style("font-size", "10px")
       //    .text("Choose counties");
 
-
-        sliderContainer.append("label")
-          .attr("for", "yearRange")
-          .style("font-size", "15px")
-          .text("Choose year (1990-2022) : ");
-
-        sliderContainer.append("br");
-
-      // Create a slider for years
-      var yearRange = sliderContainer.append("input")
-          .attr("type", "range")
-          .attr("id", "yearRange")
-          .attr("min", d3.min(years))
-          .attr("max", d3.max(years))
-          .attr("value", selectedYear)
-          .on("input", function() {
-              selectedYear = this.value;
-              updatePlot();
-          });
-
-
-      sliderContainer.append("br");
-      sliderContainer.append("br");
-
-      sliderContainer.append("label")
-      .attr("font-size", "12px")
-      .text("You can select several counties :");
-
-      sliderContainer.append("br");
-
-      var countyDropdown = sliderContainer.append("select")
-        .attr("id", "countyDropdown")
-        .attr("multiple", true)
-        .selectAll("option")
-        .data(counties)
-        .enter()
-        .append("option")
-        .text(function(d) { return d; });
 
       //var text1 = sliderContainer.append("text")
       //.attr("text-anchor", "middle")
@@ -190,7 +199,7 @@
       //.attr("font-size", 10)
       //.attr("font-weight", "bold")
       //.text("years: 1990-2022");
-
+      updatePlot();
 
     }).catch(function(error) {
     console.error("Error loading CSV: ", error);

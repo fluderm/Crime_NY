@@ -1,4 +1,4 @@
-# Interactive graph
+# Interactive graph {#interactive-overall}
 
 <style>
   * {
@@ -10,15 +10,22 @@
   #slider, #countyDropdown {
     position: relative;
   }
+  label {
+  display: block; 
+  margin-top: 10px;
+  font-weight: bold;
+  }
 
 </style> 
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <!-- <script src="scripts/myscript.js"></script> -->
 
-## Interactive Crime Landscape: A Comparative Analysis of Crime Types Across NY Counties Over Time
+## Interactive Crime Landscape: A Comparative Analysis of Crime Types Across NY Counties Over Time {#interactive-ts}
 
-This interactive time series graph empowers users to delve into the intricate nuances of crime dynamics by comparing the evolution of various crime types across different counties and time intervals. Unleashing the potential of interactivity, this tool offers a comprehensive exploration of the ever-shifting crime landscape. Traditional static graphs fall short due to the expansive array of options, but with this dynamic visualization, users can seamlessly navigate through diverse crime categories, revealing patterns, trends, and anomalies. Uncover the intricate tapestry of regional crime variations and temporal shifts, providing a powerful platform for in-depth studies and informed decision-making in law enforcement and public policy.
+This interactive time series graph allows users to delve into the more nuanced aspects of crime dynamics by comparing the evolution of various crime types across different counties and time intervals. Using interactivity, this tool offers a way to analyse and explore crime trends across several axes that would not be possible otherwise. Traditional static graphs fall short due to the sheer amount of options, but with using this tool, users can navigate through diverse crime categories, revealing patterns, trends, and anomalies. 
+
+We heavily relied on the power of the following interactive plot when analysing COVID-19 patters and general crime patterns across different counties.
 
 <div>
 <label for="startYear">Start Year:</label>
@@ -28,8 +35,11 @@ This interactive time series graph empowers users to delve into the intricate nu
 <select id="endYear"></select>
 <br>
 
+<label for="countySelect">Choose Counties (multiple):</label>
 <select id="countySelect" multiple style="width: 200px; height: 150px;"></select>
 <br>
+
+<label for="columnSelect">Choose Crime Type:</label>
 <select id="columnSelect">
     <option value="Index.Total">Index Total</option>
     <option value="Violent.Total">Violent Total</option>
@@ -48,9 +58,11 @@ This interactive time series graph empowers users to delve into the intricate nu
 <script src="scripts/ts.js"></script>
 </div>
 
-## Interactive County Crime Snapshots: Unveiling Annual Crime Distributions Across Selected Counties
+## Interactive County Crime Snapshots: Unveiling Annual Crime Distributions Across Selected Counties {#interactive-bar}
 
-This interactive bar chart plot improves the exploration of crime data by enabling users to selectively scrutinize the distribution of various crime types across different counties for a specific year. With the ability to handpick counties and a target year, users can effortlessly navigate through the complex evolution of crime dynamics. Each bar chart unveils the numbers of crime in a selected county for a specific year, allowing for a side-by-side comparison of crime distributions. This dynamic tool transcends static limitations, providing a comprehensive perspective on how different crime types manifest within a single year across diverse regions. This nuanced approach facilitates a deeper understanding of localized crime patterns, empowering users in law enforcement, research, and policy analysis.
+This interactive bar chart plot improves the exploration of crime data by enabling users to selectively analyse the distribution of various crime types across different counties for a specific year. With the ability to handpick counties and a target year, one can navigate through the detailed evolution of crime dynamics. Each bar chart counts the numbers of crime in a selected county for a specific year. We further implemented a way to allow for a side-by-side comparison of crime distributions across different counties. This provides a comprehensive perspective on how different crime types manifest within a single year across diverse regions, which helps gain a deeper understanding of localized crime patterns.
+
+We used this plot specifically to analyse patterns in crime types over the years, and to investigate how crime distributions compare across different regions during various time periods.
 
 <div id="plot">
 <script src="https://d3js.org/d3.v5.min.js"></script>

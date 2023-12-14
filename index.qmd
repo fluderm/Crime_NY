@@ -1,6 +1,5 @@
 # Introduction
 
-
 <!-- 
 
 Explain why you chose this topic, and the questions you are interested in studying. Provide context for readers who are not familiar with the topic.
@@ -9,10 +8,9 @@ Explain why you chose this topic, and the questions you are interested in studyi
 
 -->
 
-
 While deciding on a topic for our project, we received several emails from the Columbia Department of Safety about an armed robbery near the Columbia campus. This prompted us to get interested in Crime data in and around NYC – in particular; it made us question the safety around Columbia and in NYC specifically. We found several exciting and detailed datasets about crime in NYC and quickly focused on [NYC incident-level shootings](https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8) data in the past ten years to see in how much “danger” we are:
 
-```{r, echo=FALSE,results='hide', message=FALSE, warning=FALSE}
+```{r, results='hide', message=FALSE, warning=FALSE}
 
 library(ggplot2)
 library(sp)
@@ -52,9 +50,9 @@ In our exploration, we aim to address various questions related to crime dynamic
 
 To enhance the depth of our analysis, we have supplemented our primary dataset with additional data providing population numbers for each county in New York State for the time period covered in our crime dataset. This supplementary information is crucial as it allows us to calculate and compare crime rates adjusted for population size. By doing so, we aim to provide a more nuanced understanding of crime trends and ensure that our analysis considers variations in population density across different counties. This entails delving into the intricate interrelationships and connections between various crime categories and their associations with the counties in the state of New York. Our scrutiny extends to comparisons across different time periods, with a particular emphasis on discerning any discernible disparities that may exist between counties within New York City (NYC) and those outside the city limits. This strategic shift allows us to unveil nuanced patterns and variations in crime dynamics, providing a comprehensive understanding of how these phenomena unfold across distinct temporal and geographical contexts. 
 
-We will also focus on the last three decades to investigate the impact of the stop-and-frisk policy implemented in the early 2000s.Our investigative approach involves a meticulous comparison of crime rates between NYC and counties outside its jurisdiction, encompassing diverse time periods. By adopting this methodological lens, we aim to paint a comprehensive picture of the policy's influence on overall crime statistics. This analytical endeavor allows us to discern trends, patterns, and shifts in criminal activities, providing valuable insights into the multifaceted impact of "Operation Impact" on the broader landscape of crime dynamics. Through this extensive exploration, we strive to contribute to a nuanced understanding of the policy's effects and implications within the broader context of crime trends in both NYC and non-NYC counties.
+We will also investigate the impact of the stop-and-frisk and "Operation Impact" policies implemented in the early 2000s. Our approach involves a comparison of crime rates between NYC and counties outside its jurisdiction, across different time periods. By adopting this methodology, we aim to understand the policy's influence on overall crime statistics. This allows us to discern trends, patterns, and shifts in criminal activities, providing potential insights into the impact of "Operation Impact" on crime dynamics. We aim to provide a novel perspective on the policy's effects within the broader context of crime trends in both NYC and non-NYC counties.
 
-Ultimately, our research endeavors not only contribute to a comprehensive analysis of public safety trends but also serve as a valuable resource for policymakers and the public. The insights derived from this study can aid in developing informed strategies to understand and address various crime-related issues within the state of New York.
+Our research not only contributes to an analysis of public safety trends but could also serve as a valuable resource for policymakers and the public.
 
 <!--
 #https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k

@@ -23,6 +23,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -192,6 +226,33 @@ Explain why you chose this topic, and the questions you are interested in studyi
 -->
 <p>While deciding on a topic for our project, we received several emails from the Columbia Department of Safety about an armed robbery near the Columbia campus. This prompted us to get interested in Crime data in and around NYC – in particular; it made us question the safety around Columbia and in NYC specifically. We found several exciting and detailed datasets about crime in NYC and quickly focused on <a href="https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8">NYC incident-level shootings</a> data in the past ten years to see in how much “danger” we are:</p>
 <div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sp)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>crime_nyc <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">'data/NYPD_Shooting_Incident_Data__Historic__20231124.csv'</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>crime_nyc<span class="sc">$</span>OCCUR_DATE <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(crime_nyc<span class="sc">$</span>OCCUR_DATE, <span class="at">format =</span> <span class="st">'%m/%d/%Y'</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>crime_nyc_nona <span class="ot">&lt;-</span> crime_nyc[<span class="fu">complete.cases</span>(crime_nyc<span class="sc">$</span>Longitude, crime_nyc<span class="sc">$</span>Latitude), ]</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>crime_nyc_nona <span class="ot">&lt;-</span> <span class="fu">subset</span>(crime_nyc_nona, <span class="at">select =</span> <span class="sc">-</span>JURISDICTION_CODE)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>crime_nyc_nona <span class="ot">&lt;-</span> crime_nyc_nona[(crime_nyc_nona<span class="sc">$</span>OCCUR_DATE <span class="sc">&gt;</span> <span class="fu">as.Date</span>(<span class="st">'2015-01-01'</span>)), ]</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>nyc_boundaries <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">'data/nyc_election_districts/nyc_election_districts.shp'</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>crime_nyc_sf <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(crime_nyc_nona, <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"Longitude"</span>, <span class="st">"Latitude"</span>), <span class="at">crs =</span> <span class="dv">4326</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> nyc_boundaries, </span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>          <span class="at">fill =</span> <span class="st">"lightblue"</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>          <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_2d_filled</span>(<span class="at">data =</span> crime_nyc_nona, </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">aes</span>(<span class="at">x =</span> Longitude, <span class="at">y =</span> Latitude),</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>                         <span class="at">alpha =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Density Plot for Number of shootings in NYC from 2015 - 2022"</span>) <span class="sc">+</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
 </div>
@@ -202,8 +263,8 @@ Explain why you chose this topic, and the questions you are interested in studyi
 <p>Our primary dataset encompasses detailed crime statistics for each agency in New York State’s counties spanning from 1990 to 2022. This extensive temporal range of approximately three decades enables a thorough examination of the evolution of crime patterns within each New York county. Moreover, it facilitates a comparative analysis of crime statistics between New York City and the entire state.</p>
 <p>In our exploration, we aim to address various questions related to crime dynamics, patterns, and potential influencing factors. For example, we will delve into the examination of how socioeconomic factors, law enforcement strategies, and demographic shifts may have impacted crime rates over the years. Additionally, we are interested in investigating the influence of the COVID-19 pandemic on crime statistics, both in terms of overall rates and the types of crimes reported.</p>
 <p>To enhance the depth of our analysis, we have supplemented our primary dataset with additional data providing population numbers for each county in New York State for the time period covered in our crime dataset. This supplementary information is crucial as it allows us to calculate and compare crime rates adjusted for population size. By doing so, we aim to provide a more nuanced understanding of crime trends and ensure that our analysis considers variations in population density across different counties. This entails delving into the intricate interrelationships and connections between various crime categories and their associations with the counties in the state of New York. Our scrutiny extends to comparisons across different time periods, with a particular emphasis on discerning any discernible disparities that may exist between counties within New York City (NYC) and those outside the city limits. This strategic shift allows us to unveil nuanced patterns and variations in crime dynamics, providing a comprehensive understanding of how these phenomena unfold across distinct temporal and geographical contexts.</p>
-<p>We will also focus on the last three decades to investigate the impact of the stop-and-frisk policy implemented in the early 2000s.Our investigative approach involves a meticulous comparison of crime rates between NYC and counties outside its jurisdiction, encompassing diverse time periods. By adopting this methodological lens, we aim to paint a comprehensive picture of the policy’s influence on overall crime statistics. This analytical endeavor allows us to discern trends, patterns, and shifts in criminal activities, providing valuable insights into the multifaceted impact of “Operation Impact” on the broader landscape of crime dynamics. Through this extensive exploration, we strive to contribute to a nuanced understanding of the policy’s effects and implications within the broader context of crime trends in both NYC and non-NYC counties.</p>
-<p>Ultimately, our research endeavors not only contribute to a comprehensive analysis of public safety trends but also serve as a valuable resource for policymakers and the public. The insights derived from this study can aid in developing informed strategies to understand and address various crime-related issues within the state of New York.</p>
+<p>We will also investigate the impact of the stop-and-frisk and “Operation Impact” policies implemented in the early 2000s. Our approach involves a comparison of crime rates between NYC and counties outside its jurisdiction, across different time periods. By adopting this methodology, we aim to understand the policy’s influence on overall crime statistics. This allows us to discern trends, patterns, and shifts in criminal activities, providing potential insights into the impact of “Operation Impact” on crime dynamics. We aim to provide a novel perspective on the policy’s effects within the broader context of crime trends in both NYC and non-NYC counties.</p>
+<p>Our research not only contributes to an analysis of public safety trends but could also serve as a valuable resource for policymakers and the public.</p>
 <!--
 #https://data.ny.gov/Government-Finance/Annual-Population-Estimates-for-New-York-State-and/krt9-ym2k
 -->
