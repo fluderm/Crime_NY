@@ -32,7 +32,7 @@
 
       // Initial values for selected counties and year
       var selectedCounties = [counties[0]];
-      var selectedYear = years[0];
+      var selectedYear = years[-1];
 
 
     // Function to update the plot based on selected counties and year
@@ -141,14 +141,13 @@
       //    .style("font-size", "10px")
       //    .text("Choose counties");
 
-      var countyDropdown = sliderContainer.append("select")
-        .attr("id", "countyDropdown")
-        .attr("multiple", true)
-        .selectAll("option")
-        .data(counties)
-        .enter()
-        .append("option")
-        .text(function(d) { return d; });
+
+        sliderContainer.append("label")
+          .attr("for", "yearRange")
+          .style("font-size", "15px")
+          .text("Choose year (1990-2022) : ");
+
+        sliderContainer.append("br");
 
       // Create a slider for years
       var yearRange = sliderContainer.append("input")
@@ -162,11 +161,24 @@
               updatePlot();
           });
 
-      //sliderContainer.append("label")
-      //    .attr("for", "yearRange")
-      //    .style("font-size", "10px")
-      //    .style("font-weight", "bold")
-      //    .text("Choose year (1990-2022)");
+
+      sliderContainer.append("br");
+      sliderContainer.append("br");
+
+      sliderContainer.append("label")
+      .attr("font-size", "12px")
+      .text("You can select several counties :");
+
+      sliderContainer.append("br");
+
+      var countyDropdown = sliderContainer.append("select")
+        .attr("id", "countyDropdown")
+        .attr("multiple", true)
+        .selectAll("option")
+        .data(counties)
+        .enter()
+        .append("option")
+        .text(function(d) { return d; });
 
       //var text1 = sliderContainer.append("text")
       //.attr("text-anchor", "middle")
