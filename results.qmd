@@ -210,7 +210,7 @@ ggplot(crime_top_10,
 
 ```
 
-This graph shows that the NY City area (NY, Bronx, Kings, Queens and Richmond) showed the most pronounced increase in crime rates post-2020. This suggests that the socioeconomic challenges due to the pandemic were felt more strongly in the more densly populated areas of the state. This could be due to increases in poverty levels, changes in policing or other pandemic-related factors. Among the NYC counties, Richmond's (Staten Island) rise is somewhat less steep, which could potentially be attributed to its more suburban characteristics.
+This graph shows that the NY City area (NY, Bronx, Kings, Queens and Richmond) showed the most pronounced increase in crime rates post-2020. This suggests that the socioeconomic challenges due to the pandemic were felt more strongly in the more densely populated areas of the state. This could be due to increases in poverty levels, changes in policing or other pandemic-related factors. Among the NYC counties, Richmond's (Staten Island) rise is somewhat less steep, which could potentially be attributed to its more suburban characteristics.
 
 Apart from the NYC area, counties such as Albany and Schenectady also show significant upticks, which suggests a more widespread effect of the pandemic beyond just rural areas. Similarly, Cortland, Cattaraugus, and Nassau counties show a less dramatic rise, yet the increase is still evident.
 
@@ -218,7 +218,7 @@ We should be slightly careful with the crime rates here, since these numbers are
 
 In other counties, this is less clear. For example, the migration of NYC workers may have actually increased the population in neighboring counties, and therefore these crime rates could in fact be an overestimate.
 
-It is interesting to contrast the counties with the largest increase from 2020 to 2022 to the ones with the smalles increase (or even decrease).
+It is interesting to contrast the counties with the largest increase from 2020 to 2022 to the ones with the smallest increase (or even decrease).
 
 ```{r}
 
@@ -243,7 +243,7 @@ ggplot(crime_top_bot_5,
 
 From this plot, we observe that the smaller counties, such as Fulton, Schoharie, and Hamilton, were unaffected by any increase in crime rates after 2020. Still, their crime rates relatively judiciously continued the trend from pre-COVID. Hamilton is the smallest county in NY State by population (around 5,000 residents), while Schoharie and Fulton are slightly larger at about 30,000 and 50,000, respectively. Additionally, these counties are far from significant population concentrations and seem more rural. This could suggest that the pandemic's impact on crime was less severe in these areas or that other factors helped to mitigate a rise in crime rates. As mentioned in the introduction, the power of this NY State dataset is that it represents very different demographics and living styles, allowing for better contrasts and potentially more exciting questions about causation.
 
-Overall, the graph suggests that the pandemic's impact on crime has been uneven across NY State, with more densly populated counties experiencing a more notable increase in crime rates per 1,000 people compared to less populated ones. It is important to note that population changes, such as the exodus from urban centers like New York City during the pandemic, could further affect these rates. To support this assertion, we draw a scatter plot of population against crime rates to see if we can see a positive correlation.
+Overall, the graph suggests that the pandemic's impact on crime has been uneven across NY State, with more densely populated counties experiencing a more notable increase in crime rates per 1,000 people compared to less populated ones. It is important to note that population changes, such as the exodus from urban centers like New York City during the pandemic, could further affect these rates. To support this assertion, we draw a scatter plot of population against crime rates to see if we can see a positive correlation.
 
 ```{r}
 crime_inc <- impact_of_covid %>%
