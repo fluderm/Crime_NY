@@ -6,7 +6,7 @@ execute:
   echo: true
 
 book:
-  title: "Crime in NY"
+  title: "Crime Trends in New York State Since 1990"
   author:
     - Elie Chemouni (ec3778)
     - Martin Fluder (mf3590)
