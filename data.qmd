@@ -44,7 +44,6 @@ The dataset contains the [FIPS](https://en.wikipedia.org/wiki/Federal_Informatio
 
 The more detailed methodology of the “intercensal estimation” is detailed  [here](https://www.epa.gov/sites/default/files/2015-05/documents/aceappendixb_censusintercensalandpostcensaldata.pdf) and [here](https://www2.census.gov/programs-surveys/popest/technical-documentation/methodology/intercensal/2000-2010-intercensal-estimates-methodology.pdf). Essentially, for intercensal estimates, they combine the data from the two censuses with death, birth, migration, and immigration data to provide an estimate. In contrast, for postcensal forecasts, they use the previous census data and the same external sources to provide an estimate.
 
-We shall briefly investigate the efficacies of these estimates and notice that the extrapolation is comparatively worse than the intercensal estimated data, but that for our purposes the estimation errors are negligible.
 
 ## Research plan
 
@@ -54,7 +53,7 @@ To answer research questions related to crime trends and influencing factors, ou
 
 Given the extensive span of thorough reporting within our primary dataset, we can conduct longitudinal studies, examine crime rates over multiple years, and identify particular trends and patterns. We can do this for all of NY State or county specific and compare trends between counties. For instance, it would be exciting to see whether vastly contrasting trends exist among the different counties.
 
-Analyzing the data throughout the years enables assessing whether crime has increased, decreased, or remained stable. This could provide insights into the effectiveness of law enforcement strategies, changes in societal conditions, or potential impacts of specific events such as the COVID-19 pandemic. This could give a more nuanced understanding of the factors influencing crime dynamics.
+Analyzing the data throughout the years enables assessing whether crime has increased, decreased, or remained stable. This could provide insights into the effectiveness of law enforcement strategies, changes in societal conditions, or potential impacts of specific events such as the COVID-19 pandemic. This could give a more nuanced understanding of the factors influencing crime dynamics. For example, an investigation on the impact of the implementation of "Operation Impact," or commonly known as "stop-and-frisk," could show how this policy has influenced the overall landscape of crime statistics. This exploration could offer compelling insights into the broader narrative of how policies like "stop-and-frisk" interact with and influence regional crime patterns.
 
 ### Geographic aspects
 
@@ -64,7 +63,11 @@ Given the spatial information within the dataset, further supplementing it with 
 
 ### Crime specific aspects
 
-Finally, the dataset is categorized into specific crime types. This allows us to analyze trends in each category, helping identify areas of concern and inform targeted interventions for potential hotspots in particular crimes.
+Finally, the dataset is categorized into specific crime types. The primary objective is to discern noteworthy patterns, pinpoint potential areas of concern, and facilitate the formulation of targeted interventions aimed at addressing potential hotspots associated with particular crimes.
+
+Moreover, our analytical scope extends beyond mere categorization; it encompasses a more exhaustive exploration of crime types and their intricate interrelationships. This expanded analysis not only seeks to uncover underlying connections between different crime categories but also aims to provide a comprehensive understanding of how these crime types evolve over time.
+
+To enhance the depth of our investigation, we contemplate the integration of temporal elements, considering the impact of various policies or external factors such as the COVID-19 pandemic on the evolution of different crime types. By incorporating this temporal dimension, we aspire to conduct a nuanced examination of how specific crimes undergo transformations in the aftermath of significant events or policy implementations. This approach promises to yield valuable insights into the dynamic nature of crime and contribute to a more comprehensive understanding of the multifaceted factors influencing crime trends.
 
 It is crucial to acknowledge potential limitations such as data inconsistencies, reporting biases, and missing information, which may affect the robustness of conclusions drawn from the analysis.
 
