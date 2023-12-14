@@ -16,9 +16,9 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <!-- <script src="scripts/myscript.js"></script> -->
 
-## Time series (change title)
+## Interactive Crime Landscape: A Comparative Analysis of Crime Types Across NY Counties Over Time
 
-Write some stuff
+This interactive time series graph empowers users to delve into the intricate nuances of crime dynamics by comparing the evolution of various crime types across different counties and time intervals. Unleashing the potential of interactivity, this tool offers a comprehensive exploration of the ever-shifting crime landscape. Traditional static graphs fall short due to the expansive array of options, but with this dynamic visualization, users can seamlessly navigate through diverse crime categories, revealing patterns, trends, and anomalies. Uncover the intricate tapestry of regional crime variations and temporal shifts, providing a powerful platform for in-depth studies and informed decision-making in law enforcement and public policy.
 
 <div>
 <label for="startYear">Start Year:</label>
@@ -48,9 +48,9 @@ Write some stuff
 <script src="scripts/ts.js"></script>
 </div>
 
-## Yours (change title)
+## Interactive County Crime Snapshots: Unveiling Annual Crime Distributions Across Selected Counties
 
-Write some stuff
+This interactive bar chart plot improves the exploration of crime data by enabling users to selectively scrutinize the distribution of various crime types across different counties for a specific year. With the ability to handpick counties and a target year, users can effortlessly navigate through the complex evolution of crime dynamics. Each bar chart unveils the numbers of crime in a selected county for a specific year, allowing for a side-by-side comparison of crime distributions. This dynamic tool transcends static limitations, providing a comprehensive perspective on how different crime types manifest within a single year across diverse regions. This nuanced approach facilitates a deeper understanding of localized crime patterns, empowering users in law enforcement, research, and policy analysis.
 
 <div id="plot">
 <script src="https://d3js.org/d3.v5.min.js"></script>
